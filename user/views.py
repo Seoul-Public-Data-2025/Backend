@@ -11,6 +11,7 @@ class KakaoLoginAPIView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        """
         code = serializer.validated_data['code']
 
         # 카카오로 토큰 요청
@@ -42,6 +43,10 @@ class KakaoLoginAPIView(GenericAPIView):
         access_token = token_data.get("access_token")
         refresh_token = token_data.get("refresh_token")
 
+        """
+        access_token = serializer.validated_data["access_token"]
+        refresh_token = serializer.validated_data["refresh_token"]
+        
         if not access_token:
             return Response({
                 "success":False
