@@ -49,5 +49,7 @@ class KakaoLoginAPIView(GenericAPIView):
 
         return Response({
             "accessToken": access_token,
+            "refreshToken": refresh_token,
+            "email":serializer.validated_data['email'],
             "success":True
         }, status=status.HTTP_200_OK)
