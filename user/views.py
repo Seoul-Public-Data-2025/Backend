@@ -15,7 +15,7 @@ class KakaoLoginAPIView(GenericAPIView):
 
         # 카카오로 토큰 요청
         token_url = "https://kauth.kakao.com/oauth/token"
-        redirect_uri = f'kakao{client_id}://oauth'
+        redirect_uri = f'kakao{os.getenv("KAKAO_API_KEY")}://oauth'
         data = {
             "grant_type": "authorization_code",
             "client_id": os.getenv("KAKAO_API_KEY"),
