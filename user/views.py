@@ -3,6 +3,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializer import KakaoCodeSerializer
+import os
 
 class KakaoLoginAPIView(GenericAPIView):
     serializer_class = KakaoCodeSerializer
@@ -14,10 +15,11 @@ class KakaoLoginAPIView(GenericAPIView):
 
         # 카카오로 토큰 요청
         token_url = "https://kauth.kakao.com/oauth/token"
+        redirect_uri = f'kakao{client_id}://oauth'
         data = {
             "grant_type": "authorization_code",
-            "client_id": "56d45462db421a0576a8bc4710c16560",
-            "redirect_uri": "kakao56d45462db421a0576a8bc4710c16560://oauth",
+            "client_id": os.getenv("KAKAO_API_KEY"),
+            "redirect_uri": redirect_uri,
             "code": code
         }
         headers = {
