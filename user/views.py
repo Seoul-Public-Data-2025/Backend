@@ -44,8 +44,8 @@ class KakaoLoginAPIView(GenericAPIView):
         refresh_token = token_data.get("refresh_token")
 
         """
-        access_token = serializer.validated_data["access_token"]
-        refresh_token = serializer.validated_data["refresh_token"]
+        access_token = serializer.validated_data["accessToken"]
+        refresh_token = serializer.validated_data["refreshToken"]
         
         if not access_token:
             return Response({
