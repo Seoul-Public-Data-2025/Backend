@@ -22,6 +22,8 @@ class KakaoLoginAPIView(GenericAPIView):
             "redirect_uri": redirect_uri,
             "code": code
         }
+        for key,value in data.items():
+            print(key,value)
         headers = {
             "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
         }
@@ -30,9 +32,9 @@ class KakaoLoginAPIView(GenericAPIView):
             kakao_response = requests.post(token_url, data=data, headers=headers)
             kakao_response.raise_for_status()
         except requests.RequestException as e:
+            print("카카오 요청 실패 응답:", kakao_response.text)
             return Response({
-                "error": "카카오 토큰 요청 실패",
-                "details": str(e)
+                "success":False
             }, status=status.HTTP_400_BAD_REQUEST)
 
         token_data = kakao_response.json()
@@ -42,14 +44,10 @@ class KakaoLoginAPIView(GenericAPIView):
 
         if not access_token:
             return Response({
-                "error": "토큰 발급 실패",
-                "details": token_data
+                "success":False
             }, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-            "expires_in": token_data.get("expires_in"),
-            "refresh_token_expires_in": token_data.get("refresh_token_expires_in"),
-            "token_type": token_data.get("token_type")
+            "accessToken": access_token,
+            "success":True
         }, status=status.HTTP_200_OK)

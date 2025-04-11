@@ -1,3 +1,7 @@
 from rest_framework import serializers
-class KakaoCodeSerializer(serializers.Serializer):
+from .models import CustomUser
+class KakaoCodeSerializer(serializers.ModelSerializerSerializer):
     code = serializers.CharField()
+    class Meta:
+        model = CustomUser
+        fields = ["email"]
