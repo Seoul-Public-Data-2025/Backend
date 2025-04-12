@@ -27,12 +27,13 @@ SECRET_KEY = 'django-insecure-@34cl%5x81@x7l&h9feu+1q_y6*0z1tx_c+gajk+1yt&vsn#fs
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'user',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,7 +44,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'rest_framework_simplejwt',
     'corsheaders',
-    'user',
 ]
 
 REST_FRAMEWORK = {
@@ -56,6 +56,8 @@ from datetime import timedelta
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
 }
 
 
@@ -97,9 +99,9 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "HOST": os.getenv("DB_HOST", "localhost"),
         "PORT": os.getenv("DB_PORT", "5432"),
-        "NAME": os.getenv("DB_NAME", "django"),
+        "NAME": os.getenv("DB_NAME", "postgres"),
         "USER": os.getenv("DB_USER", "postgres"),
-        "PASSWORD": os.getenv("DB_PASSWORD", "postgres"),
+        "PASSWORD": os.getenv("DB_PASSWORD", "1234"),
     }
 }
 

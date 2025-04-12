@@ -1,60 +1,84 @@
 import requests
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.generics import GenericAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .serializer import KakaoCodeSerializer
-import os
+from .serializer import KakaoTokenSerializer
+from django.contrib.auth import get_user_model
 
-class KakaoLoginAPIView(GenericAPIView):
-    serializer_class = KakaoCodeSerializer
+User=get_user_model()
+
+class KakaoLoginAPIView(TokenObtainPairView):
+    serializer_class = KakaoTokenSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        """
-        code = serializer.validated_data['code']
 
-        # 카카오로 토큰 요청
-        token_url = "https://kauth.kakao.com/oauth/token"
-        redirect_uri = f'kakao{os.getenv("KAKAO_API_KEY")}://oauth'
-        data = {
-            "grant_type": "authorization_code",
-            "client_id": os.getenv("KAKAO_API_KEY"),
-            "redirect_uri": redirect_uri,
-            "code": code
-        }
-        for key,value in data.items():
-            print(key,value)
+        access_token = serializer.validated_data['accessToken']
+
+        # 카카오 액세스 토큰 유효성 검사
+        token_check_url = "https://kapi.kakao.com/v1/user/access_token_info"
         headers = {
-            "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
+            'Authorization': f'Bearer {access_token}',
         }
 
         try:
-            kakao_response = requests.post(token_url, data=data, headers=headers)
-            kakao_response.raise_for_status()
-        except requests.RequestException as e:
-            print("카카오 요청 실패 응답:", kakao_response.text)
+            kakao_response = requests.get(url=token_check_url, headers=headers)
+            kakao_response.raise_for_status()  # status_code 200이 아니면 예외 발생
+
+            data = kakao_response.json()
+            user,created=User.objects.get_or_create(
+                email=serializer.validated_data['email'],#requset로 왔었던 이메일로 저장하기
+                #email=data['id'] 카카오 accessToken검증 api의 response로 온 카카오 메일을 저장하기
+            )
+            # JWT 토큰 발급
+            refresh = RefreshToken.for_user(user)
             return Response({
-                "success":False
-            }, status=status.HTTP_400_BAD_REQUEST)
+                'success':True,
+                'data':{
+                    'accessToken': str(refresh.access_token),
+                    'refreshToken': str(refresh),
+                    'user_id': user.email
+                }
+            }, status=status.HTTP_200_OK)
 
-        token_data = kakao_response.json()
+        except requests.exceptions.HTTPError as http_err:
+            if kakao_response.status_code == 401:#access token이 유효하지 않은 경우 401에러 발생
+                return Response({
+                    'success': False,
+                    'data':{
+                        'error': 'Invalid or expired access token'
+                    }
+                }, status=status.HTTP_401_UNAUTHORIZED)
+            else:#필수 인자가 포함되지 않은 경우나 호출 인자값의 데이터 타입이 적절하지 않거나 허용된 범위를 벗어난 경우
+                return Response({
+                    'success': False,
+                    'data':{
+                        'error': f'HTTP error occurred: {http_err}',
+                        'status_code': kakao_response.status_code
+                    }
+                }, status=status.HTTP_400_BAD_REQUEST)
 
-        access_token = token_data.get("access_token")
-        refresh_token = token_data.get("refresh_token")
-
-        """
-        access_token = serializer.validated_data["accessToken"]
-        refresh_token = serializer.validated_data["refreshToken"]
-        
-        if not access_token:
+        except requests.RequestException as req_err:#카카오 서버 요청 오류, 혹은 유저 생성 및 jwt토큰 발급 오류
             return Response({
-                "success":False
-            }, status=status.HTTP_400_BAD_REQUEST)
+                'success': False,
+                'error': f'Request failed: {req_err}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response({
-            "accessToken": access_token,
-            "refreshToken": refresh_token,
-            "email":serializer.validated_data['email'],
-            "success":True
-        }, status=status.HTTP_200_OK)
+class LogoutView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        try:
+            refresh_token = request.data.get("refresh_token")  # 요청에서 Refresh Token 가져오기
+            if not refresh_token:
+                return Response({"error": "Refresh token is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+            token = RefreshToken(refresh_token)
+            token.blacklist()  # 블랙리스트에 추가
+
+            return Response({"message": "Logout successful"}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
