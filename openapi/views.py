@@ -3,11 +3,14 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializer import CCTVSerializer, SafetyFacilitySerializer
-from .models import CCTV, SafetyFacility
+from .models import CCTV, SafetyFacility, SafetyService
 import os
 import re
+from drf_yasg.utils import swagger_auto_schema
+from .swagger_docs import cctv_fetch_doc, safety_facility_doc, safety_service_doc
 
 class CCTVFetchView(APIView):
+    @swagger_auto_schema(**cctv_fetch_doc)
     def get(self, request, *args, **kwargs):
         district_code = request.query_params.get('district_code')
         api_key = os.getenv("OPEN_API_KEY")
@@ -67,6 +70,7 @@ class CCTVFetchView(APIView):
             }, status=status.HTTP_200_OK)
 
 class SafetyFacilityFetchView(APIView):
+    @swagger_auto_schema(**safety_facility_doc)
     def get(self, request, *args, **kwargs):
         api_key = os.getenv("OPEN_API_KEY")
         base_url = f"http://openapi.seoul.go.kr:8088/{api_key}/json/tbSafeReturnItem"
@@ -98,7 +102,7 @@ class SafetyFacilityFetchView(APIView):
                 'data':{
                     'error': f"총 건수 파싱 실패: {str(e)}"
                 }
-            }, status=status.HTTP_400_BAD_REQUEST)
+            }, status=status.HTTP_404_NOT_FOUND)
 
         # 반복 수집
         saved = []
@@ -142,6 +146,7 @@ class SafetyFacilityFetchView(APIView):
         }, status=status.HTTP_200_OK)
 
 class SafetyServiceFetchView(APIView):
+    @swagger_auto_schema(**safety_service_doc)
     def get(self, request, *args, **kwargs):
         api_key = os.getenv("OPEN_API_KEY")
         base_url = f"http://openapi.seoul.go.kr:8088/{api_key}/json/tbSafeReturnService"
@@ -173,7 +178,7 @@ class SafetyServiceFetchView(APIView):
                 'data':{
                     'error': f"총 건수 파싱 실패: {str(e)}"
                 }
-            }, status=status.HTTP_400_BAD_REQUEST)
+            }, status=status.HTTP_404_NOT_FOUND)
 
         # 반복 수집
         saved = []
@@ -191,7 +196,7 @@ class SafetyServiceFetchView(APIView):
 
             for row in rows:
                 try:
-                    instance = SafetyFacility.objects.create(
+                    instance = SafetyService.objects.create(
                         service_id=row.get("SERVICE_ID"),
                         service_type=row.get("SISUL_CODE"),
                         service_latitude=row.get("LATITUDE"),
