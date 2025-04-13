@@ -38,7 +38,7 @@ class KakaoLoginAPIView(TokenObtainPairView):
             refresh = RefreshToken.for_user(user)
             return Response({
                 'success':True,
-                'data':{
+                'result':{
                     'accessToken': str(refresh.access_token),
                     'refreshToken': str(refresh),
                     'user_id': user.email
@@ -49,14 +49,14 @@ class KakaoLoginAPIView(TokenObtainPairView):
             if kakao_response.status_code == 401:#access token이 유효하지 않은 경우 401에러 발생
                 return Response({
                     'success': False,
-                    'data':{
+                    'result':{
                         'error': 'Invalid or expired access token'
                     }
                 }, status=status.HTTP_401_UNAUTHORIZED)
             else:#필수 인자가 포함되지 않은 경우나 호출 인자값의 데이터 타입이 적절하지 않거나 허용된 범위를 벗어난 경우
                 return Response({
                     'success': False,
-                    'data':{
+                    'result':{
                         'error': f'HTTP error occurred: {http_err}',
                         'status_code': kakao_response.status_code
                     }
@@ -65,7 +65,9 @@ class KakaoLoginAPIView(TokenObtainPairView):
         except requests.RequestException as req_err:#카카오 서버 요청 오류, 혹은 유저 생성 및 jwt토큰 발급 오류
             return Response({
                 'success': False,
-                'error': f'Request failed: {req_err}'
+                'result':{
+                        'error': f'Request failed: {req_err}'
+                    }
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class LogoutView(GenericAPIView):
