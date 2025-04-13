@@ -2,7 +2,7 @@ import requests
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializer import CCTVSerializer, SafetyFacilitySerializer
+from .serializer import CCTVSerializer, SafetyFacilitySerializer, SafetyServiceSerializer
 from .models import CCTV, SafetyFacility, SafetyService
 import os
 import re
@@ -211,7 +211,7 @@ class SafetyServiceFetchView(APIView):
                 except Exception as e:
                     continue
 
-        serializer = SafetyFacilitySerializer(saved, many=True)
+        serializer = SafetyServiceSerializer(saved, many=True)
         return Response({
             'success':True,
             'data':{
