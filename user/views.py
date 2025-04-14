@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializer import KakaoTokenSerializer
 from django.contrib.auth import get_user_model
+import logging
+logger = logging.getLogger(__name__)
 
 User=get_user_model()
 
@@ -14,7 +16,16 @@ class KakaoLoginAPIView(TokenObtainPairView):
     serializer_class = KakaoTokenSerializer
 
     def post(self, request, *args, **kwargs):
+        # 확인용
+        print("🟢 headers:", request.headers)
+        print("🟢 content_type:", request.content_type)
+        print("🟢 body:", request.body)  # 원본 요청 raw 보기
+        print("🟢 request.data:", request.data)  # DRF가 파싱한 데이터
+        logger.info(f"[카카오 로그인 요청] {request.data}")
+        # 확인용_end
+
         serializer = self.get_serializer(data=request.data)
+        print("serializer.errors (before is_valid):", serializer.errors)
         serializer.is_valid(raise_exception=True)
 
         access_token = serializer.validated_data['accessToken']
@@ -41,7 +52,7 @@ class KakaoLoginAPIView(TokenObtainPairView):
                 'result':{
                     'accessToken': str(refresh.access_token),
                     'refreshToken': str(refresh),
-                    'user_id': user.email
+                    # 'user_id': user.email
                 }
             }, status=status.HTTP_200_OK)
 
@@ -49,17 +60,12 @@ class KakaoLoginAPIView(TokenObtainPairView):
             if kakao_response.status_code == 401:#access token이 유효하지 않은 경우 401에러 발생
                 return Response({
                     'success': False,
-                    'result':{
-                        'error': 'Invalid or expired access token'
-                    }
+                    'message': 'Invalid or expired access token'
                 }, status=status.HTTP_401_UNAUTHORIZED)
             else:#필수 인자가 포함되지 않은 경우나 호출 인자값의 데이터 타입이 적절하지 않거나 허용된 범위를 벗어난 경우
                 return Response({
                     'success': False,
-                    'result':{
-                        'error': f'HTTP error occurred: {http_err}',
-                        'status_code': kakao_response.status_code
-                    }
+                    'message': f'HTTP error occurred: {http_err}',
                 }, status=status.HTTP_400_BAD_REQUEST)
 
         except requests.RequestException as req_err:#카카오 서버 요청 오류, 혹은 유저 생성 및 jwt토큰 발급 오류

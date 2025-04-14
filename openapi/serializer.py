@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import CCTV,PoliceOffice
+from .models import CCTV, SafetyFacility, SafetyService
 from utils.constants import DISTRICT_CODE
 
 class CCTVSerializer(serializers.ModelSerializer):
@@ -11,3 +12,12 @@ class PoliceOfficeSerializer(serializers.ModelSerializer):
     class Meta:
         model=PoliceOffice
         fields=['id','officeName','lat','lot','addr']
+class SafetyFacilitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SafetyFacility
+        fields = '__all__'
+
+class SafetyServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SafetyService
+        fields = '__all__'

@@ -51,7 +51,8 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'EXCEPTION_HANDLER': 'utils.custom_exception_handler.custom_exception_handler',
 }
 
 from datetime import timedelta
@@ -106,6 +107,13 @@ DATABASES = {
         "PASSWORD": os.getenv("DB_PASSWORD", "1234"),
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 AUTH_USER_MODEL = 'user.CustomUser'
 
