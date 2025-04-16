@@ -135,11 +135,11 @@ class LogoutView(GenericAPIView):
         try:
             refresh_token = request.data.get("refresh_token")  # 요청에서 Refresh Token 가져오기
             if not refresh_token:
-                return Response({"error": "Refresh token is required"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"message": "Refresh token is required"}, status=status.HTTP_400_BAD_REQUEST)
 
             token = RefreshToken(refresh_token)
             token.blacklist()  # 블랙리스트에 추가
 
             return Response({"message": "Logout successful"}, status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
