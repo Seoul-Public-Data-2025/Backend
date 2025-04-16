@@ -38,8 +38,7 @@ class KakaoLoginAPIView(TokenObtainPairView):
                 examples={
                     "application/json": {
                         "success": False,
-                        "message": "Invalid data",
-                        "errors": {"accessToken": ["이 필드는 필수입니다."]}
+                        "message": "Invalid data"
                     }
                 }
             ),
@@ -85,8 +84,7 @@ class KakaoLoginAPIView(TokenObtainPairView):
         if not serializer.is_valid():  # serializer 유효성 검사를 먼저 실행
             return Response({
                 'success': False,
-                'message': 'Invalid data',
-                'errors': serializer.errors
+                'message': 'Invalid data'
             }, status=status.HTTP_400_BAD_REQUEST)
 
         access_token = serializer.validated_data['accessToken']
@@ -128,9 +126,7 @@ class KakaoLoginAPIView(TokenObtainPairView):
         except requests.RequestException as req_err:  # 카카오 서버 요청 오류, 혹은 유저 생성 및 jwt토큰 발급 오류
             return Response({
                 'success': False,
-                'result': {
-                    'error': f'Request failed: {req_err}'
-                }
+                'message': f'Request failed: {req_err}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
 class LogoutView(GenericAPIView):

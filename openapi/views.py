@@ -131,7 +131,7 @@ class CCTVFetchView(APIView):
         serializer = CCTVSerializer(saved_instances, many=True)
         return Response({
             'success':True,
-            'data':{
+            'result':{
                 'message': f'{len(saved_instances)} CCTV records saved successfully',
                 'cctv': serializer.data
                 }
@@ -158,18 +158,14 @@ class SafetyFacilityFetchView(APIView):
         if res.status_code != 200:
             return Response({
                 'success':False,
-                'data':{
-                        'error': 'Failed to fetch data from API'
-                    }
+                'message': 'Failed to fetch data from API'
                 }, status=status.HTTP_400_BAD_REQUEST)
         try:
             total = res.json()['tbSafeReturnItem']['list_total_count']
         except Exception as e:
             return Response({
                 'success': False,
-                'data':{
-                    'error': f"총 건수 파싱 실패: {str(e)}"
-                }
+                'message': f"총 건수 파싱 실패: {str(e)}"
             }, status=status.HTTP_404_NOT_FOUND)
 
         # 반복 수집
@@ -207,7 +203,7 @@ class SafetyFacilityFetchView(APIView):
         serializer = SafetyFacilitySerializer(saved, many=True)
         return Response({
             'success':True,
-            'data':{
+            'result':{
                 'message': f"{len(saved)} Facility records saved successfully",
                 'data': serializer.data
             }
@@ -234,18 +230,14 @@ class SafetyServiceFetchView(APIView):
         if res.status_code != 200:
             return Response({
                 'success':False,
-                'data':{
-                        'error': 'Failed to fetch data from API'
-                    }
+                'message':'Failed to fetch data from API'
                 }, status=status.HTTP_400_BAD_REQUEST)
         try:
             total = res.json()['tbSafeReturnService']['list_total_count']
         except Exception as e:
             return Response({
                 'success': False,
-                'data':{
-                    'error': f"총 건수 파싱 실패: {str(e)}"
-                }
+                'message': f"총 건수 파싱 실패: {str(e)}"
             }, status=status.HTTP_404_NOT_FOUND)
 
         # 반복 수집
@@ -282,7 +274,7 @@ class SafetyServiceFetchView(APIView):
         serializer = SafetyServiceSerializer(saved, many=True)
         return Response({
             'success':True,
-            'data':{
+            'result':{
                 'message': f"{len(saved)} Service records saved successfully",
                 'data': serializer.data
             }
