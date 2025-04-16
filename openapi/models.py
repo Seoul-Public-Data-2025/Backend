@@ -1,5 +1,5 @@
 from django.db import models
-from utils.constants import DISTRICT_CODE, FACILITY_TYPE, SERVICE_TYPE
+from utils.constants import DISTRICT_CODE, FACILITY_TYPE, SERVICE_TYPE, DISPLAY_FACILITY_TYPE
 
 
 class CCTV(models.Model):
@@ -47,3 +47,9 @@ class SafetyService(models.Model):
 
     def __str__(self):
         return f'{self.service_type} - {self.sigungu_name} {self.eupmyeondong_name}'
+
+class DisplayIcon(models.Model):
+    facility_type= models.CharField(max_length=10,choices=DISPLAY_FACILITY_TYPE),
+    lat=models.DecimalField(max_digits=11,decimal_places=8)
+    lot=models.DecimalField(max_digits=11,decimal_places=8)
+    addr=models.CharField(max_length=255)

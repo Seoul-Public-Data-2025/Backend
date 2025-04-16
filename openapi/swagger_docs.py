@@ -19,7 +19,7 @@ cctv_fetch_doc = {
             examples={
                 "application/json": {
                     "success": True,
-                    "data": {
+                    "result": {
                         "message": "120 CCTV records saved successfully",
                         "cctv": [
                             {
@@ -39,9 +39,7 @@ cctv_fetch_doc = {
             examples={
                 "application/json": {
                     'success':False,
-                    'data':{
-                        'error': 'Failed to fetch data from API'
-                    }
+                    'message':'Failed to fetch data from API'
                 }
             }
         ),
@@ -50,9 +48,7 @@ cctv_fetch_doc = {
             examples={
                 "application/json": {
                     'success':False,
-                    'data':{
-                        'message': 'No CCTV data available for this district'
-                    }
+                    'message': 'No CCTV data available for this district'
                 }
             }
         )
@@ -69,7 +65,7 @@ safety_facility_doc = {
             examples={
                 "application/json": {
                     "success": True,
-                    "data": {
+                    "result": {
                         "message": "300 Facility records saved successfully",
                         "data": [
                             {
@@ -95,9 +91,7 @@ safety_facility_doc = {
             examples={
                 "application/json": {
                     'success':False,
-                    'data':{
-                        'error': 'Failed to fetch data from API'
-                    }
+                    'message':'Failed to fetch data from API'
                 }
             }
         ),
@@ -106,9 +100,7 @@ safety_facility_doc = {
             examples={
                 "application/json": {
                     'success':False,
-                    'data':{
-                        'error': "총 건수 파싱 실패: error"
-                    }
+                    'message': "총 건수 파싱 실패: error"
                 }
             }
         )
@@ -125,7 +117,7 @@ safety_service_doc = {
             examples={
                 "application/json": {
                     "success": True,
-                    "data": {
+                    "result": {
                         "message": "150 Service records saved successfully",
                         "data": [
                             {
@@ -151,9 +143,7 @@ safety_service_doc = {
             examples={
                 "application/json": {
                     'success': False,
-                    'data': {
-                        'error': 'Failed to fetch data from API'
-                    }
+                    'message': 'Failed to fetch data from API'
                 }
             }
         ),
@@ -162,9 +152,7 @@ safety_service_doc = {
             examples={
                 "application/json": {
                     'success': False,
-                    'data': {
-                        'error': "총 건수 파싱 실패: error"
-                    }
+                    'message': "총 건수 파싱 실패: error"
                 }
             }
         )

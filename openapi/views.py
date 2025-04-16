@@ -273,3 +273,6 @@ class SafetyServiceFetchView(APIView):
                 'data': serializer.data
             }
         }, status=status.HTTP_200_OK)
+        
+class DisplayIconView(APIView):
+    pass
