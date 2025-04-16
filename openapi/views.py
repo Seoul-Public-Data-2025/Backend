@@ -13,7 +13,7 @@ class PoliceOfficeFetchView(APIView):
         police_api_url=f'https://api.odcloud.kr/api/15077036/v1/uddi:dc5ea479-c327-4ae7-916c-e52e3784b6ef?serviceKey={service_key}'
         police_params = {
             "page": 1,
-            "perPage": 30,
+            "perPage": 300,
             "returnType": "json",
         }
         try:

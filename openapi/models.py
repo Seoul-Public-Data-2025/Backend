@@ -49,7 +49,7 @@ class SafetyService(models.Model):
         return f'{self.service_type} - {self.sigungu_name} {self.eupmyeondong_name}'
 
 class DisplayIcon(models.Model):
-    facility_type= models.CharField(max_length=10,choices=DISPLAY_FACILITY_TYPE),
+    facility_type= models.CharField(max_length=10,choices=DISPLAY_FACILITY_TYPE)
     lat=models.DecimalField(max_digits=11,decimal_places=8)
     lot=models.DecimalField(max_digits=11,decimal_places=8)
     addr=models.CharField(max_length=255, null=True, blank=True)
