@@ -9,51 +9,15 @@ from .serializer import KakaoTokenSerializer
 from django.contrib.auth import get_user_model
 import logging
 from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
+from .swagger_docs import kakao_login_doc
+
 logger = logging.getLogger(__name__)
 
 User=get_user_model()
 
 class KakaoLoginAPIView(TokenObtainPairView):
     serializer_class = KakaoTokenSerializer
-    @swagger_auto_schema(
-        operation_summary="카카오 로그인",
-        operation_description="카카오 accessToken을 이용해 JWT 토큰을 발급받습니다. 이미 가입된 이메일이면 로그인, 없으면 새로 생성.",
-        request_body=KakaoTokenSerializer,
-        responses={
-            200: openapi.Response(
-                description="로그인 성공",
-                examples={
-                    "application/json": {
-                        "success": True,
-                        "result": {
-                            "accessToken": "jwt_access_token",
-                            "refreshToken": "jwt_refresh_token"
-                        }
-                    }
-                }
-            ),
-            400: openapi.Response(
-                description="잘못된 요청",
-                examples={
-                    "application/json": {
-                        "success": False,
-                        "message": "Invalid data"
-                    }
-                }
-            ),
-            401: openapi.Response(
-                description="카카오 토큰 유효하지 않음",
-                examples={
-                    "application/json": {
-                        "success": False,
-                        "message": "Invalid or expired access token"
-                    }
-                }
-            ),
-        },
-        tags=["Auth"]
-    )
+    @swagger_auto_schema(**kakao_login_doc)
     def post(self, request, *args, **kwargs):
         # 확인용
         print("🟢 headers:", request.headers)

@@ -56,7 +56,7 @@ class PoliceOfficeFetchView(APIView):
         serializer = PoliceOfficeSerializer(created, many=True)
         return Response({
             'success':True,
-            'data':{
+            'result':{
                 'policeOffice': serializer.data
                 }
             }, status=status.HTTP_201_CREATED)
@@ -76,9 +76,7 @@ class CCTVFetchView(APIView):
         if not district_code:
             return Response({
                 'success': False,
-                'data':{
-                    'error': 'district_code query param is required'
-                }
+                'message': 'district_code query param is required'
             }, status=status.HTTP_400_BAD_REQUEST)
         api_key = os.getenv("OPEN_API_KEY")
         base_url = f"http://openapi.seoul.go.kr:8088/{api_key}/json/safeOpenCCTV_{district_code}"
@@ -88,9 +86,7 @@ class CCTVFetchView(APIView):
         if response.status_code != 200:
             return Response({
                 'success':False,
-                'data':{
-                        'error': 'Failed to fetch data from API'
-                    }
+                'message':'Failed to fetch data from API'
                 }, status=status.HTTP_400_BAD_REQUEST)
         data = response.json()
         data_key = f"safeOpenCCTV_{district_code}"
@@ -98,9 +94,7 @@ class CCTVFetchView(APIView):
         if total_count == 0:
             return Response({
                 'success':False,
-                'data':{
-                        'message': 'No CCTV data available for this district'
-                    }
+                'message': 'No CCTV data available for this district'
                 }, status=status.HTTP_404_NOT_FOUND)
         
         per_page = 1000
