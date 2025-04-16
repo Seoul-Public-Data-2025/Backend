@@ -1,5 +1,5 @@
 from django.urls import path
-from user.views import KakaoLoginAPIView,LogoutView
+from user.views import KakaoLoginAPIView,LogoutView,UserUpdateView
 from rest_framework_simplejwt.views import TokenRefreshView
 from openapi.views import CCTVFetchView, SafetyFacilityFetchView, SafetyServiceFetchView, DisplayIconView, PoliceOfficeFetchView
 from .schema import schema_view
@@ -15,4 +15,5 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('api/display-icon/',DisplayIconView.as_view(),name='display-icon'),
+    path('api/user/',UserUpdateView.as_view(),name='user-setting'),#accessToken필요
 ]

@@ -5,3 +5,8 @@ class KakaoTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields=["email","accessToken"]
+        
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=CustomUser
+        fields = ['notification']

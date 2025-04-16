@@ -21,6 +21,7 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True, null=False)
     create_at = models.DateTimeField(auto_now_add=True)
+    notification = models.BooleanField(default=True)
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"

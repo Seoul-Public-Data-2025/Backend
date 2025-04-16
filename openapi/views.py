@@ -260,6 +260,7 @@ class SafetyServiceFetchView(APIView):
                         eupmyeondong_code=row.get("EMD_CODE"),
                         sigungu_name=row.get("SGG_NM"),
                         eupmyeondong_name=row.get("EMD_NM"),
+                        office_name=row.get("REMARK"),
                     )
                     saved.append(instance)
                 except Exception as e:
@@ -289,7 +290,8 @@ class DisplayIconView(APIView):
                 "facility_type": "001",  # 예: "POLICE"
                 "lat": item.lat,
                 "lot": item.lot,
-                "addr": item.addr
+                "addr": item.addr,
+                "office_name": item.officeName
             })
         for item in SafetyFacility.objects.all():
             result.append({
@@ -301,14 +303,21 @@ class DisplayIconView(APIView):
         for item in SafetyService.objects.all():
             if item.service_type == "402":
                 facility_type = "004"  # 안전지킴이집
+                result.append({
+                    "facility_type": facility_type,
+                    "lat": item.service_latitude,
+                    "lot": item.service_longitude,
+                    "addr": item.service_location,
+                    "office_name":item.office_name
+                })
             else:
                 facility_type = "003"  # 기본은 안전시설물
-            result.append({
-                "facility_type": facility_type,
-                "lat": item.service_latitude,
-                "lot": item.service_longitude,
-                "addr": item.service_location
-            })
+                result.append({
+                    "facility_type": facility_type,
+                    "lat": item.service_latitude,
+                    "lot": item.service_longitude,
+                    "addr": item.service_location
+                })
         serializer = DisplayIconSerializer(data=result, many=True)
         if not serializer.is_valid():
             return Response({

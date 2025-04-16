@@ -44,6 +44,7 @@ class SafetyService(models.Model):
     eupmyeondong_code = models.CharField(max_length=20, null=False)
     eupmyeondong_name = models.CharField(max_length=20, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    office_name=models.CharField('OfficeName',max_length=255,null=True,blank=True)
 
     def __str__(self):
         return f'{self.service_type} - {self.sigungu_name} {self.eupmyeondong_name}'
@@ -53,3 +54,4 @@ class DisplayIcon(models.Model):
     lat=models.DecimalField(max_digits=11,decimal_places=8)
     lot=models.DecimalField(max_digits=11,decimal_places=8)
     addr=models.CharField(max_length=255, null=True, blank=True)
+    office_name=models.CharField('OfficeName',max_length=255,null=True,blank=True)
