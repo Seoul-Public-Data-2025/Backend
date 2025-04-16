@@ -3,7 +3,7 @@ from geopy.geocoders import Nominatim
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializer import CCTVSerializer,PoliceOfficeSerializer
+from .serializer import CCTVSerializer,PoliceOfficeSerializer,DisplayIconSerializer
 from .models import CCTV,PoliceOffice
 import os
 import time
@@ -275,4 +275,48 @@ class SafetyServiceFetchView(APIView):
         }, status=status.HTTP_200_OK)
         
 class DisplayIconView(APIView):
-    pass
+    def get(self,request,*args,**kwargs):
+        result=[]
+        for item in CCTV.objects.all():
+            result.append({
+                "facility_type": "002",  # 예: "CCTV"로 직접 문자열 지정 (DISPLAY_FACILITY_TYPE 안에 있어야 함)
+                "lat": item.lat,
+                "lot": item.lot,
+                "addr": item.addr
+            })
+        for item in PoliceOffice.objects.all():
+            result.append({
+                "facility_type": "001",  # 예: "POLICE"
+                "lat": item.lat,
+                "lot": item.lot,
+                "addr": item.addr
+            })
+        for item in SafetyFacility.objects.all():
+            result.append({
+                "facility_type": "003",  # ex. "301"
+                "lat": item.facility_latitude,
+                "lot": item.facility_longitude,
+                "addr": item.facility_location
+            })
+        for item in SafetyService.objects.all():
+            if item.service_type == "402":
+                facility_type = "004"  # 안전지킴이집
+            else:
+                facility_type = "003"  # 기본은 안전시설물
+            result.append({
+                "facility_type": facility_type,
+                "lat": item.service_latitude,
+                "lot": item.service_longitude,
+                "addr": item.service_location
+            })
+        serializer = DisplayIconSerializer(data=result, many=True)
+        if not serializer.is_valid():
+            return Response({
+                'success': False,
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({
+            'success': True,
+            'result': serializer.data
+        }, status=status.HTTP_200_OK)
