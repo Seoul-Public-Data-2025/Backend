@@ -8,6 +8,7 @@ from .models import CCTV,PoliceOffice
 import os
 import time
 from django.conf import settings
+from rest_framework.permissions import IsAuthenticated
 class PoliceOfficeFetchView(APIView):
     def get(self,request,*args,**kwargs):
         service_key = os.getenv("SERVICE_KEY")
@@ -330,6 +331,7 @@ class SafetyServiceFetchView(APIView):
         }, status=status.HTTP_200_OK)
         
 class DisplayIconView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self,request,*args,**kwargs):
         result=[]
         for item in CCTV.objects.all():
