@@ -390,6 +390,7 @@ class DisplayIconView(APIView):
         }, status=status.HTTP_200_OK)
 
 class ImageURLView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self,request):
         serializer = ImageRequestSerializer(data=request.data)
         if serializer.is_valid():
