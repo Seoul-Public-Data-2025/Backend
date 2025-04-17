@@ -355,7 +355,7 @@ class DisplayIconView(APIView):
                 "lat": item.facility_latitude,
                 "lot": item.facility_longitude,
                 "addr": item.facility_location,
-                "image": item.image
+                "image": f"{settings.STATIC_URL}image/{item.image}"
             })
         for item in SafetyService.objects.all():
             if item.service_type == "402":
@@ -366,7 +366,7 @@ class DisplayIconView(APIView):
                     "lot": item.service_longitude,
                     "addr": item.service_location,
                     "office_name":item.office_name,
-                    "image": item.image
+                    "image": f"{settings.STATIC_URL}image/{item.image}"
                 })
             else:
                 facility_type = "003"  # 기본은 안전시설물
@@ -375,7 +375,7 @@ class DisplayIconView(APIView):
                     "lat": item.service_latitude,
                     "lot": item.service_longitude,
                     "addr": item.service_location,
-                    "image": item.image
+                    "image": f"{settings.STATIC_URL}image/{item.image}"
                 })
         serializer = DisplayIconSerializer(data=result, many=True)
         if not serializer.is_valid():
@@ -388,22 +388,3 @@ class DisplayIconView(APIView):
             'success': True,
             'result': serializer.data
         }, status=status.HTTP_200_OK)
-
-class ImageURLView(APIView):
-    permission_classes = [IsAuthenticated]
-    def post(self,request):
-        serializer = ImageRequestSerializer(data=request.data)
-        if serializer.is_valid():
-            filename = serializer.validated_data['image']
-            image_url=f"{settings.STATIC_URL}image/{filename}" 
-            return Response({
-             "success":True,
-             "result":{
-                 "url":image_url
-             }   
-            },status=status.HTTP_200_OK)
-        return Response({
-            "success":False,
-            "message":serializer.errors
-        },status=status.HTTP_400_BAD_REQUEST)
-        
