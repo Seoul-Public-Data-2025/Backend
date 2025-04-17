@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import CustomUser
+
 class KakaoTokenSerializer(serializers.ModelSerializer):
     accessToken=serializers.CharField()
     class Meta:
@@ -10,3 +11,8 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model=CustomUser
         fields = ['notification']
+
+class FCMTokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['fcm_token']
