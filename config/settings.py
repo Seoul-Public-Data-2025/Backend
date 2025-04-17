@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'drf_yasg',
+    'storages',
 ]
 
 REST_FRAMEWORK = {
@@ -151,7 +152,37 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+#STATIC_URL = 'static/'
+#STATICFILES_DIRS=[BASE_DIR / 'static',]
+STATIC_ROOT=BASE_DIR / 'staticfiles'
+
+STATIC_URL = f'https://{os.getenv("S3_STORAGE_BUCKET_NAME", "django-mini-project")}.s3.amazonaws.com/static/'
+MEDIA_URL = f'https://{os.getenv("S3_STORAGE_BUCKET_NAME", "django-mini-project")}.s3.amazonaws.com/media/'
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "access_key": os.getenv("S3_ACCESS_KEY", ""),
+            "secret_key": os.getenv("S3_SECRET_ACCESS_KEY", ""),
+            "bucket_name": os.getenv("S3_STORAGE_BUCKET_NAME", ""),
+            "region_name": os.getenv("S3_REGION_NAME", ""),
+            "location": "media",
+            "default_acl": "public-read",
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "access_key": os.getenv("S3_ACCESS_KEY", ""),
+            "secret_key": os.getenv("S3_SECRET_ACCESS_KEY", ""),
+            "bucket_name": os.getenv("S3_STORAGE_BUCKET_NAME", ""),
+            "region_name": os.getenv("S3_REGION_NAME", ""),
+            "custom_domain": f'{os.getenv("S3_STORAGE_BUCKET_NAME", "")}.s3.amazonaws.com',
+            "location": "static",
+            "default_acl": "public-read",
+        },
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

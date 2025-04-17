@@ -105,7 +105,7 @@ class LogoutView(GenericAPIView):
             token = RefreshToken(refresh_token)
             token.blacklist()  # 블랙리스트에 추가
 
-            return Response({"success": False,"message": "Logout successful"}, status=status.HTTP_205_RESET_CONTENT)
+            return Response({"success": True,"message": "Logout successful"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"success": False,"message": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
 

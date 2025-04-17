@@ -25,3 +25,6 @@ class DisplayIconSerializer(serializers.ModelSerializer):
     class Meta:
         model = DisplayIcon
         fields = '__all__'
+
+class ImageRequestSerializer(serializers.Serializer):
+    image = serializers.CharField()

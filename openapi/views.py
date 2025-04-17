@@ -3,10 +3,11 @@ from geopy.geocoders import Nominatim
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializer import CCTVSerializer,PoliceOfficeSerializer,DisplayIconSerializer
+from .serializer import CCTVSerializer,PoliceOfficeSerializer,DisplayIconSerializer,ImageRequestSerializer
 from .models import CCTV,PoliceOffice
 import os
 import time
+from django.conf import settings
 class PoliceOfficeFetchView(APIView):
     def get(self,request,*args,**kwargs):
         service_key = os.getenv("SERVICE_KEY")
@@ -20,7 +21,10 @@ class PoliceOfficeFetchView(APIView):
             response = requests.get(police_api_url, params=police_params)
             response.raise_for_status()
         except requests.RequestException as e:
-            return Response({"error": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+            return Response({
+                "success":False,
+                "message": str(e)
+                }, status=status.HTTP_502_BAD_GATEWAY)
         
         police_data = response.json().get("data", [])
         geolocator = Nominatim(user_agent="SeoulMaum",timeout=None)
@@ -53,6 +57,54 @@ class PoliceOfficeFetchView(APIView):
                     created.append(office)
             except Exception as e:
                 continue
+            
+        police_api_url=f'https://api.odcloud.kr/api/15124966/v1/uddi:345a2432-5fee-4c49-a353-80b62496a43b?serviceKey={service_key}'
+        police_params = {
+            "page": 1,
+            "perPage": 40,
+            "returnType": "json",
+        }
+        try:
+            response = requests.get(police_api_url, params=police_params)
+            response.raise_for_status()
+        except requests.RequestException as e:
+            return Response({
+                "success":False,
+                "message": str(e)
+                }, status=status.HTTP_502_BAD_GATEWAY)
+        
+        police_data = response.json().get("data", [])
+        geolocator = Nominatim(user_agent="SeoulMaum",timeout=None)
+        created = []
+        for item in police_data:
+            office_name = item.get("경찰서명칭")
+            if not office_name or "서울" not in office_name:
+                continue
+            address = item.get("경찰서주소")
+            start = time.time()
+            location = geolocator.geocode(address)
+            print(f"Geocode took: {time.time() - start:.2f} seconds")
+            if not location:
+                continue
+            
+            lat = location.latitude
+            lot = location.longitude
+            
+            try:
+                # get_or_create로 중복 여부 체크
+                office, created_flag = PoliceOffice.objects.get_or_create(
+                    lat=lat,
+                    lot=lot,
+                    defaults={
+                        "officeName": office_name,
+                        "addr": address,
+                    }
+                )
+                if created_flag:
+                    created.append(office)
+            except Exception as e:
+                continue
+            
         serializer = PoliceOfficeSerializer(created, many=True)
         return Response({
             'success':True,
@@ -189,6 +241,7 @@ class SafetyFacilityFetchView(APIView):
                         eupmyeondong_code=row.get("EMD_CODE"),
                         sigungu_name=row.get("SGG_NAME"),
                         eupmyeondong_name=row.get("EMD_NM"),
+                        image=row.get("IMAGE"),
                     )
                     saved.append(instance)
                 except Exception as e:
@@ -261,6 +314,7 @@ class SafetyServiceFetchView(APIView):
                         sigungu_name=row.get("SGG_NM"),
                         eupmyeondong_name=row.get("EMD_NM"),
                         office_name=row.get("REMARK"),
+                        image=row.get("IMAGE"),
                     )
                     saved.append(instance)
                 except Exception as e:
@@ -298,7 +352,8 @@ class DisplayIconView(APIView):
                 "facility_type": "003",  # ex. "301"
                 "lat": item.facility_latitude,
                 "lot": item.facility_longitude,
-                "addr": item.facility_location
+                "addr": item.facility_location,
+                "image": item.image
             })
         for item in SafetyService.objects.all():
             if item.service_type == "402":
@@ -308,7 +363,8 @@ class DisplayIconView(APIView):
                     "lat": item.service_latitude,
                     "lot": item.service_longitude,
                     "addr": item.service_location,
-                    "office_name":item.office_name
+                    "office_name":item.office_name,
+                    "image": item.image
                 })
             else:
                 facility_type = "003"  # 기본은 안전시설물
@@ -316,7 +372,8 @@ class DisplayIconView(APIView):
                     "facility_type": facility_type,
                     "lat": item.service_latitude,
                     "lot": item.service_longitude,
-                    "addr": item.service_location
+                    "addr": item.service_location,
+                    "image": item.image
                 })
         serializer = DisplayIconSerializer(data=result, many=True)
         if not serializer.is_valid():
@@ -329,3 +386,21 @@ class DisplayIconView(APIView):
             'success': True,
             'result': serializer.data
         }, status=status.HTTP_200_OK)
+
+class ImageURLView(APIView):
+    def post(self,request):
+        serializer = ImageRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            filename = serializer.validated_data['image']
+            image_url=f"{settings.STATIC_URL}image/{filename}" 
+            return Response({
+             "success":True,
+             "result":{
+                 "url":image_url
+             }   
+            },status=status.HTTP_200_OK)
+        return Response({
+            "success":False,
+            "message":serializer.errors
+        },status=status.HTTP_400_BAD_REQUEST)
+        
