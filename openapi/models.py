@@ -56,5 +56,5 @@ class DisplayIcon(models.Model):
     lat=models.DecimalField(max_digits=11,decimal_places=8)
     lot=models.DecimalField(max_digits=11,decimal_places=8)
     addr=models.CharField(max_length=255, null=True, blank=True)
-    office_name=models.CharField('OfficeName',max_length=255,null=True,blank=True)
+    officeName=models.CharField('OfficeName',max_length=255,null=True,blank=True)
     image=models.CharField(max_length=100,null=True,blank=True)
