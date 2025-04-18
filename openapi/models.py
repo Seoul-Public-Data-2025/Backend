@@ -15,6 +15,8 @@ class PoliceOffice(models.Model):
     lat=models.DecimalField(max_digits=11,decimal_places=8)
     lot=models.DecimalField(max_digits=11,decimal_places=8)
     addr=models.CharField(max_length=255)
+    image=models.CharField(max_length=255,null=True,blank=True)
+    phone_number=models.CharField(max_length=20,null=True,blank=True)
     class Meta:
         unique_together = (('lat', 'lot'),('office_name','lat','lot','addr'))
 
@@ -29,7 +31,7 @@ class SafetyFacility(models.Model):
     eupmyeondong_code = models.CharField(max_length=20, null=False)
     eupmyeondong_name = models.CharField(max_length=20, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    image=models.CharField(max_length=100,null=True,blank=True)
+    image=models.CharField(max_length=255,null=True,blank=True)
     
     def __str__(self):
         return f'{self.facility_type} - {self.sigungu_name} {self.eupmyeondong_name}'
@@ -46,15 +48,16 @@ class SafetyService(models.Model):
     eupmyeondong_name = models.CharField(max_length=20, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
     office_name=models.CharField('OfficeName',max_length=255,null=True,blank=True)
-    image=models.CharField(max_length=100,null=True,blank=True)
+    image=models.CharField(max_length=255,null=True,blank=True)
 
     def __str__(self):
         return f'{self.service_type} - {self.sigungu_name} {self.eupmyeondong_name}'
 
 class DisplayIcon(models.Model):
-    facility_type= models.CharField(max_length=10,choices=DISPLAY_FACILITY_TYPE)
+    facilityType= models.CharField(max_length=10,choices=DISPLAY_FACILITY_TYPE)
     lat=models.DecimalField(max_digits=11,decimal_places=8)
     lot=models.DecimalField(max_digits=11,decimal_places=8)
     addr=models.CharField(max_length=255, null=True, blank=True)
     officeName=models.CharField('OfficeName',max_length=255,null=True,blank=True)
-    image=models.CharField(max_length=100,null=True,blank=True)
+    image=models.CharField(max_length=255,null=True,blank=True)
+    phoneNumber=models.CharField(max_length=20,null=True,blank=True)

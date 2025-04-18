@@ -10,7 +10,7 @@ class CCTVSerializer(serializers.ModelSerializer):
 class PoliceOfficeSerializer(serializers.ModelSerializer):
     class Meta:
         model = PoliceOffice
-        fields = ['id','office_name','lat','lot','addr']
+        fields = ['id','office_name','lat','lot','addr','image','phone_number']
 class SafetyFacilitySerializer(serializers.ModelSerializer):
     class Meta:
         model = SafetyFacility
