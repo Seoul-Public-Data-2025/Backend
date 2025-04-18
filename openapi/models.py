@@ -11,12 +11,12 @@ class CCTV(models.Model):
         unique_together = (('lat', 'lot'),('district','lat','lot','addr'))
     
 class PoliceOffice(models.Model):
-    officeName=models.CharField('OfficeName',max_length=255)
+    office_name=models.CharField('OfficeName',max_length=255)
     lat=models.DecimalField(max_digits=11,decimal_places=8)
     lot=models.DecimalField(max_digits=11,decimal_places=8)
     addr=models.CharField(max_length=255)
     class Meta:
-        unique_together = (('lat', 'lot'),('officeName','lat','lot','addr'))
+        unique_together = (('lat', 'lot'),('office_name','lat','lot','addr'))
 
 class SafetyFacility(models.Model):
     facility_id = models.CharField(max_length=50, unique=True) # 시설물코드 (같은 위치 CCTV의 경우 덮어쓰기가 됨, 그래서 시설물코드로 구분)

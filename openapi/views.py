@@ -50,7 +50,7 @@ class PoliceOfficeFetchView(APIView):
                     lat=lat,
                     lot=lot,
                     defaults={
-                        "officeName": office_name,
+                        "office_name": office_name,
                         "addr": address,
                     }
                 )
@@ -97,7 +97,7 @@ class PoliceOfficeFetchView(APIView):
                     lat=lat,
                     lot=lot,
                     defaults={
-                        "officeName": office_name,
+                        "office_name": office_name,
                         "addr": address,
                     }
                 )
@@ -107,10 +107,13 @@ class PoliceOfficeFetchView(APIView):
                 continue
             
         serializer = PoliceOfficeSerializer(created, many=True)
+        data = serializer.data.copy()
+        data['officeName'] = data.pop('office_name')
+
         return Response({
             'success':True,
             'result':{
-                'policeOffice': serializer.data
+                'policeOffice': data
                 }
             }, status=status.HTTP_201_CREATED)
         
@@ -347,7 +350,7 @@ class DisplayIconView(APIView):
                 "lat": item.lat,
                 "lot": item.lot,
                 "addr": item.addr,
-                "office_name": item.officeName
+                "office_name": item.office_name
             })
         for item in SafetyFacility.objects.all():
             result.append({
