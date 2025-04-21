@@ -12,11 +12,16 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# TODO: FCM 완료 후 주석 해제
+# fcm
+# firebase-adminsdk.json 파일 경로 설정
+# FIREBASE_CREDENTIAL_PATH = os.path.join(BASE_DIR, 'config', 'firebase-adminsdk.json')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -35,7 +40,7 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = [
     'user',
     'openapi',
-    'relation'
+    'relation',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
