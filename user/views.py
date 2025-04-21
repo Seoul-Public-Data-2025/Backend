@@ -7,7 +7,7 @@ from rest_framework.mixins import UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .serializer import KakaoTokenSerializer, UserUpdateSerializer, FCMTokenSerializer
+from .serializer import KakaoTokenSerializer, UserUpdateSerializer
 from django.contrib.auth import get_user_model
 import logging
 from drf_yasg.utils import swagger_auto_schema
@@ -129,24 +129,25 @@ class UserUpdateView(GenericAPIView,UpdateModelMixin):
             instance._prefetched_objects_cache = {}
         return Response({'success': True, 'result': serializer.data})
 
+# TODO: FCM 완료 후 주석 해제
 # fcm
-class FCMTokenUpdateView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def patch(self, request):
-        user = request.user
-        serializer = FCMTokenSerializer(user, data=request.data, partial=True)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response({
-                'success': True,
-                'result': {
-                 'message': 'FCM token updated successfully'
-                }
-            }, status=status.HTTP_200_OK)
-
-        return Response({
-            'success' : False,
-            'message' : serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
+# class FCMTokenUpdateView(APIView):
+#     permission_classes = [IsAuthenticated]
+#
+#     def patch(self, request):
+#         user = request.user
+#         serializer = FCMTokenSerializer(user, data=request.data, partial=True)
+#
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response({
+#                 'success': True,
+#                 'result': {
+#                  'message': 'FCM token updated successfully'
+#                 }
+#             }, status=status.HTTP_200_OK)
+#
+#         return Response({
+#             'success' : False,
+#             'message' : serializer.errors
+#         }, status=status.HTTP_400_BAD_REQUEST)

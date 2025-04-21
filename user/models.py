@@ -23,8 +23,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     create_at = models.DateTimeField(auto_now_add=True)
     notification = models.BooleanField(default=True)
 
+    # TODO: FCM 완료 후 주석 해제
     # fcm
-    fcm_token = models.CharField(max_length=255, null=True, blank=True)
+    # fcm_token = models.CharField(max_length=255, null=True, blank=True)
 
     objects = CustomUserManager()
 

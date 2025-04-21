@@ -12,7 +12,8 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         model=CustomUser
         fields = ['notification']
 
-class FCMTokenSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = ['fcm_token']
+# TODO: FCM 완료 후 주석 해제
+# class FCMTokenSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = CustomUser
+#         fields = ['fcm_token']
