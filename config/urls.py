@@ -3,7 +3,7 @@ from user.views import KakaoLoginAPIView, LogoutView, UserUpdateView
 from relation.views import RelationRequestView, RelationApproveView, RelationListView
 from user.views import KakaoLoginAPIView,LogoutView
 from rest_framework_simplejwt.views import TokenRefreshView
-from openapi.views import CCTVFetchView, SafetyFacilityFetchView, SafetyServiceFetchView, DisplayIconView, PoliceOfficeFetchView, ImageURLView
+from openapi.views import CCTVFetchView, SafetyFacilityFetchView, SafetyServiceFetchView, DisplayIconView, PoliceOfficeFetchView
 from .schema import schema_view
 urlpatterns = [
     path('api/auth/kakao-login/', KakaoLoginAPIView.as_view(), name='kakao-login'),#카카오 access_token으로 로그인 (JWT 발급)
@@ -21,8 +21,6 @@ urlpatterns = [
     path('api/relation-approve/<int:relation_id>/', RelationApproveView.as_view(), name='relation-approve'), # fcm 연동으로 relation_id 포함한 실시간 알림 날려야 함
     path('api/relation-list/', RelationListView.as_view(),name='relation-list'),
     path('api/user/',UserUpdateView.as_view(),name='user-setting'),#accessToken필요
-    path('api/image/',ImageURLView.as_view(),name='image-url'),
-
     # TODO: FCM 완료 후 주석 해제
     # path('api/fcm-token/', FCMTokenUpdateView.as_view(), name='fcm-token'),
 ]

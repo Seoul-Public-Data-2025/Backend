@@ -8,6 +8,7 @@ from .models import CCTV,PoliceOffice
 import os
 import time
 from django.conf import settings
+from rest_framework.permissions import IsAuthenticated
 class PoliceOfficeFetchView(APIView):
     def get(self,request,*args,**kwargs):
         service_key = os.getenv("SERVICE_KEY")
@@ -49,7 +50,7 @@ class PoliceOfficeFetchView(APIView):
                     lat=lat,
                     lot=lot,
                     defaults={
-                        "officeName": office_name,
+                        "office_name": office_name,
                         "addr": address,
                     }
                 )
@@ -96,7 +97,7 @@ class PoliceOfficeFetchView(APIView):
                     lat=lat,
                     lot=lot,
                     defaults={
-                        "officeName": office_name,
+                        "office_name": office_name,
                         "addr": address,
                     }
                 )
@@ -330,50 +331,53 @@ class SafetyServiceFetchView(APIView):
         }, status=status.HTTP_200_OK)
         
 class DisplayIconView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self,request,*args,**kwargs):
         result=[]
         for item in CCTV.objects.all():
             result.append({
-                "facility_type": "002",  # 예: "CCTV"로 직접 문자열 지정 (DISPLAY_FACILITY_TYPE 안에 있어야 함)
+                "facilityType": "002",  # 예: "CCTV"로 직접 문자열 지정 (DISPLAY_FACILITY_TYPE 안에 있어야 함)
                 "lat": item.lat,
                 "lot": item.lot,
                 "addr": item.addr
             })
         for item in PoliceOffice.objects.all():
             result.append({
-                "facility_type": "001",  # 예: "POLICE"
+                "facilityType": "001",  # 예: "POLICE"
                 "lat": item.lat,
                 "lot": item.lot,
                 "addr": item.addr,
-                "office_name": item.officeName
+                "officeName": item.office_name,
+                "image": item.image,
+                "phoneNumber": item.phone_number
             })
         for item in SafetyFacility.objects.all():
             result.append({
-                "facility_type": "003",  # ex. "301"
+                "facilityType": "003",  # ex. "301"
                 "lat": item.facility_latitude,
                 "lot": item.facility_longitude,
                 "addr": item.facility_location,
-                "image": item.image
+                "image": f"{settings.STATIC_URL}image/{item.image}"
             })
         for item in SafetyService.objects.all():
             if item.service_type == "402":
                 facility_type = "004"  # 안전지킴이집
                 result.append({
-                    "facility_type": facility_type,
+                    "facilityType": facility_type,
                     "lat": item.service_latitude,
                     "lot": item.service_longitude,
                     "addr": item.service_location,
-                    "office_name":item.office_name,
-                    "image": item.image
+                    "officeName":item.office_name,
+                    "image": f"{settings.STATIC_URL}image/{item.image}"
                 })
             else:
                 facility_type = "003"  # 기본은 안전시설물
                 result.append({
-                    "facility_type": facility_type,
+                    "facilityType": facility_type,
                     "lat": item.service_latitude,
                     "lot": item.service_longitude,
                     "addr": item.service_location,
-                    "image": item.image
+                    "image": f"{settings.STATIC_URL}image/{item.image}"
                 })
         serializer = DisplayIconSerializer(data=result, many=True)
         if not serializer.is_valid():
@@ -386,21 +390,3 @@ class DisplayIconView(APIView):
             'success': True,
             'result': serializer.data
         }, status=status.HTTP_200_OK)
-
-class ImageURLView(APIView):
-    def post(self,request):
-        serializer = ImageRequestSerializer(data=request.data)
-        if serializer.is_valid():
-            filename = serializer.validated_data['image']
-            image_url=f"{settings.STATIC_URL}image/{filename}" 
-            return Response({
-             "success":True,
-             "result":{
-                 "url":image_url
-             }   
-            },status=status.HTTP_200_OK)
-        return Response({
-            "success":False,
-            "message":serializer.errors
-        },status=status.HTTP_400_BAD_REQUEST)
-        
