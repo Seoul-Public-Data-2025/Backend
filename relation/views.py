@@ -1,18 +1,34 @@
 from django.shortcuts import render
-
+from utils.permission import HasHashedPhoneNumber
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from django.db.models import Q
 from relation.models import Relation
 from relation.serializer import RelationRequestSerializer, RelationApproveSerializer
+from firebase_admin import messaging
 
 class RelationRequestView(APIView): # 부모-자녀 등록 요청
+    permission_classes = [HasHashedPhoneNumber]
     def post(self, request):
         serializer = RelationRequestSerializer(data=request.data, context={'request': request})
 
         if serializer.is_valid():
-            serializer.save()
+            relation=serializer.save()
+            parent_user = relation.parent_user
+            if parent_user.fcmToken:
+                message = messaging.Message(
+                    notification=messaging.Notification(
+                        title="관계 요청",
+                        body=f"{relation.child.profileName}님이 보호자 등록을 요청했습니다.",
+                    ),
+                    token=parent_user.fcmToken,
+                )
+                try:
+                    messaging.send(message)
+                except Exception as e:
+                    # 로그만 찍고 실패해도 관계는 저장
+                    print("FCM 전송 실패:", e)
             return Response({
                 'success': True,
                 'result': {
@@ -21,8 +37,10 @@ class RelationRequestView(APIView): # 부모-자녀 등록 요청
             }, status=status.HTTP_201_CREATED)
         return Response({
             'success': False,
-            'message': 'The request failed.'
+            'message': serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
+        
+        
 
 
 class RelationApproveView(APIView): # 부모-자녀 등록 수락

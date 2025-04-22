@@ -22,11 +22,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True, null=False)
     create_at = models.DateTimeField(auto_now_add=True)
     notification = models.BooleanField(default=True)
-
-    # TODO: FCM 완료 후 주석 해제
-    # fcm
-    # fcm_token = models.CharField(max_length=255, null=True, blank=True)
-
+    fcmToken = models.CharField(max_length=255, null=True, blank=True)
+    hashedPhoneNumber = models.CharField(max_length=100, null = True , blank= True)
+    image = models.CharField(max_length=255, null=True, blank= True)
+    profileName=models.CharField(max_length=20, null=False, blank=False)
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"
