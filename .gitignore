@@ -835,3 +835,9 @@ FodyWeavers.xsd
 
 # secret
 .config_secret/*
+
+# .json
+*.json
+
+
+
