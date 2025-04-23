@@ -10,7 +10,7 @@ class KakaoTokenSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model=CustomUser
-        fields = ['notification']
+        fields = ['notification','fcmToken','profileName','image']
 
 
 class FCMTokenSerializer(serializers.ModelSerializer):
