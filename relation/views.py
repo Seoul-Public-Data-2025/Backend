@@ -14,18 +14,23 @@ class RelationRequestView(APIView): # 부모-자녀 등록 요청
     permission_classes = [HasHashedPhoneNumber,IsAuthenticated]
     def post(self, request):
         serializer = RelationRequestSerializer(data=request.data, context={'request': request})
-
+        
         if serializer.is_valid():
             relation=serializer.save()
             parent_user = relation.parent_user
-            if parent_user.fcmToken:
-                send_fcm_notification(token=parent_user.fcmToken,
-                                      title="관계요청",
-                                      body=f"{relation.child.profileName}님이 보호자 등록을 요청했습니다.",
-                                      data={
-                                          "type":"regist",
-                                          "id":relation.id
-                                      })
+            if not parent_user.fcmToken:
+                return Response({
+                    "success": False,
+                    "message": "보호자의 FCM 토큰이 존재하지 않습니다."
+                }, status=status.HTTP_400_BAD_REQUEST)
+            send_fcm_notification(
+                token=parent_user.fcmToken,
+                title="관계요청",
+                body=f"{relation.child.profileName}님이 보호자 등록을 요청했습니다.",
+                data={
+                    "type":"regist",
+                    "id":relation.id
+                })
             return Response({
                 'success': True,
                 'result': {
