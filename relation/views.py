@@ -24,7 +24,7 @@ class RelationRequestView(APIView): # 부모-자녀 등록 요청
             send_fcm_notification(
                 token=parent_user.fcmToken,
                 title="관계요청",
-                body=f"{relation.child.profileName}({relation.child.email})님이 보호자 등록을 요청했습니다.",
+                body=f"{relation.child.email}님이 보호자 등록을 요청했습니다.",
                 data={
                     "type":"regist",
                     "id":relation.id
@@ -73,7 +73,7 @@ class ResendNotificationView(APIView):
                 title="관계요청",
                 body=f"{relation.child.profileName}님이 보호자 등록을 요청했습니다.",
                 data={
-                    "type": "parent",
+                    "type": "regist",
                     "id": relation.id
                 }
             )
@@ -247,7 +247,7 @@ class RelationDeleteView(APIView):
             body=f"{relation.child.profileName}님이 보호자 등록을 취소했습니다.",
             data={
                 "type": "delete",
-                "id": relation.id
+                "id": relation_id
             }
         )
         return Response({
