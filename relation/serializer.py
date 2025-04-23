@@ -4,10 +4,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from user.models import CustomUser
 
 class RelationRequestSerializer(serializers.Serializer):
-    parentPhoneNumber=serializers.CharField(max_length=100, null = False,blank=False)
+    parentPhoneNumber = serializers.CharField(required=True, allow_blank=False)
+    parentName = serializers.CharField(required=True, allow_blank=False)
     class Meta:
         model = Relation
-        fields = ['childName', 'parentPhoneNumber', 'parentName']
+        fields = ['parentPhoneNumber', 'parentName']
 
     def create(self, validated_data):
         child = self.context['request'].user
@@ -23,7 +24,7 @@ class RelationRequestSerializer(serializers.Serializer):
         
         # Relation 객체 생성
         relation = Relation.objects.create(
-            childName=validated_data['childName'],
+            childName=child.profileName,
             parent_user=parent_user,  # 찾은 부모 유저를 설정
             parentName=validated_data['parentName'],
             child=child,  # 현재 로그인된 유저를 자녀로 설정

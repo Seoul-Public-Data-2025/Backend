@@ -42,6 +42,7 @@ class RelationRequestView(APIView): # 부모-자녀 등록 요청
         }, status=status.HTTP_400_BAD_REQUEST)
         
 class ResendNotificationView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         relation_id = request.data.get("id")
 
@@ -66,21 +67,25 @@ class ResendNotificationView(APIView):
                 "success": False,
                 "message": "보호자의 FCM 토큰이 존재하지 않습니다."
             }, status=status.HTTP_400_BAD_REQUEST)
-            
-        send_fcm_notification(
-            token=parent_user.fcmToken,
-            title="관계요청",
-            body=f"{relation.child.profileName}님이 보호자 등록을 요청했습니다.",
-            data={
-                "type": "parent",
-                "id": relation.id
-            }
-        )
+        if relation.is_approved==False:    
+            send_fcm_notification(
+                token=parent_user.fcmToken,
+                title="관계요청",
+                body=f"{relation.child.profileName}님이 보호자 등록을 요청했습니다.",
+                data={
+                    "type": "parent",
+                    "id": relation.id
+                }
+            )
         
+            return Response({
+                "success": True,
+                "message": "알림을 재전송했습니다."
+            }, status=status.HTTP_200_OK)
         return Response({
-            "success": True,
-            "message": "알림을 재전송했습니다."
-        }, status=status.HTTP_200_OK)
+            "success": False,
+            "message": "이미 승인됐습니다."
+        })
 
 class RelationApproveView(APIView): # 부모-자녀 등록 수락
     permission_classes=[IsAuthenticated]
