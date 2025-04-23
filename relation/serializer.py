@@ -15,11 +15,11 @@ class RelationRequestSerializer(serializers.Serializer):
         try:
             parent_user = CustomUser.objects.filter(hashedPhoneNumber=parent_phone_number).first()
         except ObjectDoesNotExist:
-            raise serializers.ValidationError("해당 전화번호를 가진 부모 유저가 존재하지 않습니다.")
+            raise serializers.ValidationError("해당 전화번호를 가진 보호자 유저가 존재하지 않습니다.")
         
         # 자녀가 이미 부모를 등록한 경우, 새로운 관계를 추가하지 않음
         if Relation.objects.filter(child=child, parent_user=parent_user).exists():
-            raise serializers.ValidationError("이 자녀는 이미 해당 부모와 관계가 등록되어 있습니다.")
+            raise serializers.ValidationError("이 사용자는 이미 해당 보호자와 관계가 등록되어 있습니다.")
         
         # Relation 객체 생성
         relation = Relation.objects.create(
