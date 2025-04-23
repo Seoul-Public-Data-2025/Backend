@@ -21,6 +21,7 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True, null=False)
     create_at = models.DateTimeField(auto_now_add=True)
+    deleted_at=models.DateTimeField(null=True)
     notification = models.BooleanField(default=True)
     fcmToken = models.CharField(max_length=255, null=True, blank=True)
     hashedPhoneNumber = models.CharField(max_length=100, null = True , blank= True)

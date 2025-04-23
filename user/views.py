@@ -2,13 +2,15 @@ import requests
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 from rest_framework.generics import GenericAPIView
-from rest_framework.mixins import UpdateModelMixin
+from rest_framework.mixins import UpdateModelMixin,DestroyModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from .serializer import KakaoTokenSerializer, UserUpdateSerializer, FCMTokenSerializer
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 import logging
 from drf_yasg.utils import swagger_auto_schema
 from .swagger_docs import kakao_login_doc
@@ -37,6 +39,9 @@ class KakaoLoginAPIView(TokenObtainPairView):
 
         if user:  # 이메일 중복이 있을 경우
             # JWT 리프레시 토큰 발급
+            if user.deleted_at is not None:
+                user.deleted_at = None
+                user.save()
             refresh = RefreshToken.for_user(user)
             return Response({
                 'success': True,
@@ -110,7 +115,7 @@ class LogoutView(GenericAPIView):
         except Exception as e:
             return Response({"success": False,"message": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
 
-class UserUpdateView(GenericAPIView,UpdateModelMixin):
+class UserUpdateDeleteView(GenericAPIView,UpdateModelMixin,DestroyModelMixin):
     serializer_class=UserUpdateSerializer
     permission_classes = [IsAuthenticated]
 
@@ -128,6 +133,20 @@ class UserUpdateView(GenericAPIView,UpdateModelMixin):
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
         return Response({'success': True, 'result': serializer.data})
+    def delete(self, request, *args, **kwargs):
+        user = self.get_object()
+        user.deleted_at = timezone.now()
+        user.save()
+        try:
+            tokens = OutstandingToken.objects.filter(user=user)
+            for token in tokens:
+                BlacklistedToken.objects.get_or_create(token=token)
+        except:
+            pass
+        return Response({
+            'success': True,
+            'message': '회원 탈퇴가 완료되었습니다.'
+        }, status=status.HTTP_204_NO_CONTENT)
 
 class FCMTokenUpdateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -143,6 +162,7 @@ class FCMTokenUpdateView(APIView):
                  'message': 'FCM token updated successfully'
                 }
             }, status=status.HTTP_200_OK)
+            
         return Response({
             'success' : False,
             'message' : serializer.errors

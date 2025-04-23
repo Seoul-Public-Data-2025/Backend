@@ -1,6 +1,6 @@
 from django.urls import path
-from user.views import KakaoLoginAPIView, LogoutView, UserUpdateView
-from relation.views import RelationRequestView, RelationApproveView, RelationListView
+from user.views import KakaoLoginAPIView, LogoutView, UserUpdateDeleteView
+from relation.views import RelationRequestView, RelationApproveView, RelationRoleListView, ResendNotificationView, RelationUpdateNameView, RelationDeleteView
 from user.views import KakaoLoginAPIView,LogoutView
 from rest_framework_simplejwt.views import TokenRefreshView
 from openapi.views import CCTVFetchView, SafetyFacilityFetchView, SafetyServiceFetchView, DisplayIconView, PoliceOfficeFetchView
@@ -18,7 +18,10 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('api/display-icon/',DisplayIconView.as_view(),name='display-icon'),
     path('api/relation-requset/', RelationRequestView.as_view(),name='relation-request'),
-    path('api/relation-approve/<int:relation_id>/', RelationApproveView.as_view(), name='relation-approve'), # fcm 연동으로 relation_id 포함한 실시간 알림 날려야 함
-    path('api/relation-list/', RelationListView.as_view(),name='relation-list'),
-    path('api/user/',UserUpdateView.as_view(),name='user-setting'),#accessToken필요
+    path('api/relation-resend/', ResendNotificationView.as_view(), name='relation-resend'),
+    path('api/relation-approve/', RelationApproveView.as_view(), name='relation-approve'), # fcm 연동으로 relation_id 포함한 실시간 알림 날려야 함
+    path('api/relation-list/', RelationRoleListView.as_view(),name='relation-list'),
+    path('api/relation-update/',RelationUpdateNameView.as_view(),name='relation-update-name'),
+    path('api/relation-delete/',RelationDeleteView.as_view(),name='relation-delete'),
+    path('api/user/',UserUpdateDeleteView.as_view(),name='user-update-delete'),#accessToken필요
 ]
