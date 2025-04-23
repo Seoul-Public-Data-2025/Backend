@@ -3,11 +3,9 @@ from utils.permission import HasHashedPhoneNumber
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.db.models import Q
+from rest_framework import status
 from relation.models import Relation
-from relation.serializer import RelationRequestSerializer, RelationApproveSerializer
-from firebase_admin import messaging
+from relation.serializer import RelationRequestSerializer
 from utils.fcm import send_fcm_notification
 
 class RelationRequestView(APIView): # 부모-자녀 등록 요청
