@@ -836,3 +836,4 @@ FodyWeavers.xsd
 
 # secret
 .config_secret/*
+firebase-adminsdk.json
