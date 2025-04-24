@@ -190,7 +190,11 @@ class SafetyFacilityFetchView(APIView):
         api_key = os.getenv("OPEN_API_KEY")
         base_url = f"http://openapi.seoul.go.kr:8088/{api_key}/json/tbSafeReturnItem"
         page_size = 1000
-
+        naver_reverse_geo_url = "https://maps.apigw.ntruss.com/map-reversegeocode/v2/gc"
+        naver_reverse_geo_headers = {
+            "x-ncp-apigw-api-key-id": os.getenv("NAVER_CLOUD_PLATFORM_CLIENT_ID"),
+            "x-ncp-apigw-api-key": os.getenv("NAVER_CLOUD_PLATFORM_CLIENT_SECRET")
+        }
         def extract_coords_from_point(point_str):
             match = re.search(r"POINT\s*\(?([\d.]+)\s+([\d.]+)\)?", point_str, re.IGNORECASE)
             if match:
@@ -198,7 +202,57 @@ class SafetyFacilityFetchView(APIView):
                 lat = float(match.group(2))
                 return lng, lat
             return None, None
+        
+        def get_road_address(lat, lng):
+            params = {
+                "coords": f"{lng},{lat}",
+                "output": "json",
+                "orders": "admcode,addr,roadaddr"
+            }
+            try:
+                res = requests.get(naver_reverse_geo_url, headers=naver_reverse_geo_headers, params=params)
+                if res.status_code == 200:
+                    data = res.json()
+                    results = data.get("results", [])
 
+                    def extract_region(result):
+                        region = result.get("region", {})
+                        area1 = region.get("area1", {}).get("name", "")
+                        area2 = region.get("area2", {}).get("name", "")
+                        area3 = region.get("area3", {}).get("name", "")
+                        area4 = region.get("area4", {}).get("name", "")
+                        return f"{area1} {area2} {area3} {area4}".strip()
+
+                    def extract_land(result):
+                        land = result.get("land", {})
+                        road_name = land.get("name", "")
+                        number1 = land.get("number1", "")
+                        number2 = land.get("number2", "")
+                        addr = f"{road_name} {number1}".strip()
+                        if number2:
+                            addr += f"-{number2}"
+                        return addr.strip()
+
+                    priority_order = ["roadaddr", "addr", "admcode"]
+
+                    for name in priority_order:
+                        for result in results:
+                            if result.get("name") == name:
+                                region_part = extract_region(result)
+                                if name in ["roadaddr", "addr"]:
+                                    land_part = extract_land(result)
+                                    full_address = f"{region_part} {land_part}".strip()
+                                else:
+                                    full_address = region_part
+                                if full_address:
+                                    print(f"[DEBUG] 반환된 주소({name}): {full_address}")
+                                    return full_address
+
+            except Exception as e:
+                print(f"[ERROR] 주소 변환 실패: {e}")
+                pass
+
+            return None
         # 전체 건수 확인
         url = f"{base_url}/1/1/"
         res = requests.get(url)
@@ -231,18 +285,25 @@ class SafetyFacilityFetchView(APIView):
 
             for row in rows:
                 lng, lat = extract_coords_from_point(row.get("POINT_WKT", ""))
+                if not lng or not lat:
+                    continue
+
+                road_address = get_road_address(lat, lng)
+
                 try:
-                    instance = SafetyFacility.objects.create(
+                    instance, _ = SafetyFacility.objects.update_or_create(
                         facility_id=row.get("FACI_ID"),
-                        facility_type=row.get("FACI_CODE"),
-                        facility_latitude=lat,
-                        facility_longitude=lng,
-                        facility_location=row.get("DELOC"),
-                        sigungu_code=row.get("SGG_CODE"),
-                        eupmyeondong_code=row.get("EMD_CODE"),
-                        sigungu_name=row.get("SGG_NAME"),
-                        eupmyeondong_name=row.get("EMD_NM"),
-                        image=row.get("IMAGE"),
+                        defaults={
+                            "facility_type": row.get("FACI_CODE"),
+                            "facility_latitude": lat,
+                            "facility_longitude": lng,
+                            "facility_location": road_address,
+                            "sigungu_code": row.get("SGG_CODE"),
+                            "eupmyeondong_code": row.get("EMD_CODE"),
+                            "sigungu_name": row.get("SGG_NAME"),
+                            "eupmyeondong_name": row.get("EMD_NM"),
+                            "image": row.get("IMAGE"),
+                        }
                     )
                     saved.append(instance)
                 except Exception as e:
@@ -352,14 +413,13 @@ class DisplayIconView(APIView):
                 "phoneNumber": item.phone_number
             })
         for item in SafetyFacility.objects.all():
-            if item.facility_type=="301":
-                result.append({
-                    "facilityType": "003",  # ex. "301"
-                    "lat": item.facility_latitude,
-                    "lot": item.facility_longitude,
-                    "addr": item.facility_location,
-                    "image": f"{settings.STATIC_URL}image/{item.image}"
-                })
+            result.append({
+                "facilityType": "003",  # ex. "301"
+                "lat": item.facility_latitude,
+                "lot": item.facility_longitude,
+                "addr": item.facility_location,
+                "image": f"{settings.STATIC_URL}image/{item.image}"
+            })
         for item in SafetyService.objects.all():
             if item.service_type == "402":
                 facility_type = "004"  # 안전지킴이집
