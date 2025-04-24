@@ -352,13 +352,14 @@ class DisplayIconView(APIView):
                 "phoneNumber": item.phone_number
             })
         for item in SafetyFacility.objects.all():
-            result.append({
-                "facilityType": "003",  # ex. "301"
-                "lat": item.facility_latitude,
-                "lot": item.facility_longitude,
-                "addr": item.facility_location,
-                "image": f"{settings.STATIC_URL}image/{item.image}"
-            })
+            if item.facility_type=="301":
+                result.append({
+                    "facilityType": "003",  # ex. "301"
+                    "lat": item.facility_latitude,
+                    "lot": item.facility_longitude,
+                    "addr": item.facility_location,
+                    "image": f"{settings.STATIC_URL}image/{item.image}"
+                })
         for item in SafetyService.objects.all():
             if item.service_type == "402":
                 facility_type = "004"  # 안전지킴이집
