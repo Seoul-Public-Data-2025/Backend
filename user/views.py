@@ -41,6 +41,10 @@ class KakaoLoginAPIView(TokenObtainPairView):
             # JWT 리프레시 토큰 발급
             if user.deleted_at is not None:
                 user.deleted_at = None
+                user.fcmToken = request.data.get('fcmToken')
+                user.hashedPhoneNumber = request.data.get('hashedPhoneNumber')
+                user.nickname = request.data.get('nickname', None)
+                user.profile = request.data.get('profile', None)
                 user.save()
             refresh = RefreshToken.for_user(user)
             return Response({
@@ -76,6 +80,8 @@ class KakaoLoginAPIView(TokenObtainPairView):
                     email=email,
                     fcmToken=request.data.get('fcmToken'),  # 예시로 받아오는 fcmToken
                     hashedPhoneNumber=request.data.get('hashedPhoneNumber'),
+                    nickname=request.data.get('nickname',None),
+                    profile=request.data.get('profile',None),
                 )
             refresh = RefreshToken.for_user(user)
             return Response({
