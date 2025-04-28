@@ -9,7 +9,7 @@ from relation.serializer import RelationRequestSerializer
 from utils.fcm import send_fcm_notification
 
 class RelationRequestView(APIView): # 부모-자녀 등록 요청
-    permission_classes = [HasHashedPhoneNumber,IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         serializer = RelationRequestSerializer(data=request.data, context={'request': request})
         
@@ -133,14 +133,13 @@ class RelationApproveView(APIView): # 부모-자녀 등록 수락
         }, status=status.HTTP_200_OK)
         
 
-class RelationRoleListView(APIView):
+class RelationChildListView(APIView):
     permission_classes=[IsAuthenticated]
     def get(self, request):
         user = request.user
 
-        # 보호자인 관계들
         as_parent = Relation.objects.filter(parent_user=user, is_approved=True)
-        parent_relations = [{
+        child_relations = [{
             "id": rel.id,
             "name": rel.child.profileName,
             "phone": rel.child.hashedPhoneNumber,
@@ -148,9 +147,20 @@ class RelationRoleListView(APIView):
             "isApproved": rel.is_approved
         } for rel in as_parent]
 
-        # 피보호자인 관계들
+        return Response({
+            "success": True,
+            "result": {
+                "relations": child_relations
+            }
+        }, status=status.HTTP_200_OK)
+
+class RelationParentListView(APIView):
+    permission_classes=[IsAuthenticated]
+    def get(self, request):
+        user = request.user
+
         as_child = Relation.objects.filter(child=user, is_approved=True)
-        child_relations = [{
+        parent_relations = [{
             "id": rel.id,
             "name": rel.parent_user.profileName,
             "phone": rel.parent_user.hashedPhoneNumber,
@@ -161,7 +171,7 @@ class RelationRoleListView(APIView):
         return Response({
             "success": True,
             "result": {
-                "relations": parent_relations + child_relations
+                "relations": parent_relations
             }
         }, status=status.HTTP_200_OK)
 

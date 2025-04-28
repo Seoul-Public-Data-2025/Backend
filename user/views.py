@@ -58,7 +58,7 @@ class KakaoLoginAPIView(TokenObtainPairView):
                 'message': 'Invalid data'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        access_token = serializer.validated_data['accessToken']
+        access_token = serializer.validated_data['kakaoAccessToken']
         
         # 카카오 액세스 토큰 유효성 검사
         token_check_url = "https://kapi.kakao.com/v1/user/access_token_info"
@@ -72,7 +72,11 @@ class KakaoLoginAPIView(TokenObtainPairView):
             data = kakao_response.json()
 
             # 새 사용자 생성
-            user = User.objects.create(email=email)
+            user = User.objects.create(
+                    email=email,
+                    fcmToken=request.data.get('fcmToken'),  # 예시로 받아오는 fcmToken
+                    hashedPhoneNumber=request.data.get('hashedPhoneNumber'),
+                )
             refresh = RefreshToken.for_user(user)
             return Response({
                 'success': True,
@@ -86,7 +90,7 @@ class KakaoLoginAPIView(TokenObtainPairView):
             if kakao_response.status_code == 401:  # access token이 유효하지 않은 경우 401에러 발생
                 return Response({
                     'success': False,
-                    'message': 'Invalid or expired access token'
+                    'message': 'Invalid or expired access token 카카오 토큰 재발급하세용'
                 }, status=status.HTTP_401_UNAUTHORIZED)
             else:  # 필수 인자가 포함되지 않은 경우나 호출 인자값의 데이터 타입이 적절하지 않거나 허용된 범위를 벗어난 경우
                 return Response({
@@ -146,7 +150,7 @@ class UserUpdateDeleteView(GenericAPIView,UpdateModelMixin,DestroyModelMixin):
         return Response({
             'success': True,
             'message': '회원 탈퇴가 완료되었습니다.'
-        }, status=status.HTTP_204_NO_CONTENT)
+        }, status=status.HTTP_200_OK)
 
 class FCMTokenUpdateView(APIView):
     permission_classes = [IsAuthenticated]

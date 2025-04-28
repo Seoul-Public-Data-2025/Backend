@@ -1,6 +1,6 @@
 from django.urls import path
 from user.views import KakaoLoginAPIView, LogoutView, UserUpdateDeleteView
-from relation.views import RelationRequestView, RelationApproveView, RelationRoleListView, ResendNotificationView, RelationUpdateNameView, RelationDeleteView
+from relation.views import RelationRequestView, RelationApproveView, RelationParentListView, RelationChildListView, ResendNotificationView, RelationUpdateNameView, RelationDeleteView
 from user.views import KakaoLoginAPIView,LogoutView
 from rest_framework_simplejwt.views import TokenRefreshView
 from openapi.views import CCTVFetchView, SafetyFacilityFetchView, SafetyServiceFetchView, DisplayIconView, PoliceOfficeFetchView
@@ -20,7 +20,8 @@ urlpatterns = [
     path('api/relation-requset/', RelationRequestView.as_view(),name='relation-request'),
     path('api/relation-resend/', ResendNotificationView.as_view(), name='relation-resend'),
     path('api/relation-approve/', RelationApproveView.as_view(), name='relation-approve'), # fcm 연동으로 relation_id 포함한 실시간 알림 날려야 함
-    path('api/relation-list/', RelationRoleListView.as_view(),name='relation-list'),
+    path('api/relation-parent-list/', RelationParentListView.as_view(),name='relation-parent-list'),
+    path('api/relation-child-list/', RelationChildListView.as_view(),name='relation-child-list'),
     path('api/relation-update/',RelationUpdateNameView.as_view(),name='relation-update-name'),
     path('api/relation-delete/',RelationDeleteView.as_view(),name='relation-delete'),
     path('api/user/',UserUpdateDeleteView.as_view(),name='user-update-delete'),#accessToken필요
