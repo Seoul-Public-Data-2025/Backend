@@ -177,3 +177,7 @@ class FCMTokenUpdateView(APIView):
             'success' : False,
             'message' : serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
+
+class HealthCheckView(APIView):
+    def get(self,request):
+        return Response(status=status.HTTP_200_OK)

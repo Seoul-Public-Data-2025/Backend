@@ -1,11 +1,12 @@
 from django.urls import path
 from user.views import KakaoLoginAPIView, LogoutView, UserUpdateDeleteView
-from relation.views import RelationRequestView, RelationApproveView, RelationParentListView, RelationChildListView, ResendNotificationView, RelationUpdateNameView, RelationDeleteView
-from user.views import KakaoLoginAPIView,LogoutView
+from relation.views import RelationRequestView, RelationApproveView, RelationParentListView, RelationChildListView, ResendNotificationView, RelationUpdateNameView, RelationDeleteView,FCMTestView
+from user.views import KakaoLoginAPIView,LogoutView,HealthCheckView
 from rest_framework_simplejwt.views import TokenRefreshView
 from openapi.views import CCTVFetchView, SafetyFacilityFetchView, SafetyServiceFetchView, DisplayIconView, PoliceOfficeFetchView
 from .schema import schema_view
 urlpatterns = [
+    path('',HealthCheckView.as_view(),name='health-check'),
     path('api/auth/kakao-login/', KakaoLoginAPIView.as_view(), name='kakao-login'),#카카오 access_token으로 로그인 (JWT 발급)
     path('api/auth/refresh/',TokenRefreshView.as_view(), name='token-refresh'),#refreshToken으로 accessToken 갱신
     path('api/auth/logout/',LogoutView.as_view(), name='user-logout'),#서버에서 refreshToken 폐기
@@ -25,4 +26,5 @@ urlpatterns = [
     path('api/relation-update/',RelationUpdateNameView.as_view(),name='relation-update-name'),
     path('api/relation-delete/',RelationDeleteView.as_view(),name='relation-delete'),
     path('api/user/',UserUpdateDeleteView.as_view(),name='user-update-delete'),#accessToken필요
+    path('test-fcm/',FCMTestView.as_view(),name='fcm-test'),
 ]

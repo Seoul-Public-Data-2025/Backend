@@ -1,4 +1,5 @@
 from firebase_admin import messaging
+from user.models import CustomUser
 
 def send_fcm_notification(token, title, body, data=None):
     """
@@ -10,18 +11,20 @@ def send_fcm_notification(token, title, body, data=None):
     :param data: (선택) 딕셔너리 형태의 추가 데이터
     :return: 응답 메시지 ID 또는 예외
     """
-    try:
-        message = messaging.Message(
-            token=token,
-            notification=messaging.Notification(
-                title=title,
-                body=body
-            ),
-            data=data or {},  # 딕셔너리 형태로 추가 데이터 전달 가능
-        )
+    user=CustomUser.objects.filter(fcmToken=token).first()
+    if user.notification:
+        try:
+            message = messaging.Message(
+                token=token,
+                notification=messaging.Notification(
+                    title=title,
+                    body=body
+                ),
+                data=data or {},  # 딕셔너리 형태로 추가 데이터 전달 가능
+            )
 
-        response = messaging.send(message)
-        return response  # 메시지 ID 반환
-    except Exception as e:
-        print(f"FCM fail : {e}")
-        return None
+            response = messaging.send(message)
+            return response  # 메시지 ID 반환
+        except Exception as e:
+            print(f"FCM fail : {e}")
+            return None

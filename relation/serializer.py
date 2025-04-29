@@ -24,7 +24,7 @@ class RelationRequestSerializer(serializers.Serializer):
         
         # Relation 객체 생성
         relation = Relation.objects.create(
-            childName=child.profileName,
+            childName=child.nickname,
             parent_user=parent_user,  # 찾은 부모 유저를 설정
             parentName=validated_data['parentName'],
             child=child,  # 현재 로그인된 유저를 자녀로 설정
