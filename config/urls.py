@@ -18,7 +18,7 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('api/display-icon/',DisplayIconView.as_view(),name='display-icon'),
-    path('api/relation-requset/', RelationRequestView.as_view(),name='relation-request'),
+    path('api/relation-request/', RelationRequestView.as_view(),name='relation-request'),
     path('api/relation-resend/', ResendNotificationView.as_view(), name='relation-resend'),
     path('api/relation-approve/', RelationApproveView.as_view(), name='relation-approve'), # fcm 연동으로 relation_id 포함한 실시간 알림 날려야 함
     path('api/relation-parent-list/', RelationParentListView.as_view(),name='relation-parent-list'),
