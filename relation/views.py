@@ -142,10 +142,10 @@ class RelationChildListView(APIView):
     def get(self, request):
         user = request.user
 
-        as_parent = Relation.objects.filter(parent_user=user, is_approved=True)
+        as_parent = Relation.objects.filter(parent_user=user)
         child_relations = [{
             "id": rel.id,
-            "name": rel.child.profileName,
+            "name": rel.childName,
             "phone": rel.child.hashedPhoneNumber,
             "role": "parent",
             "isApproved": rel.is_approved
@@ -163,10 +163,10 @@ class RelationParentListView(APIView):
     def get(self, request):
         user = request.user
 
-        as_child = Relation.objects.filter(child=user, is_approved=True)
+        as_child = Relation.objects.filter(child=user)
         parent_relations = [{
             "id": rel.id,
-            "name": rel.parent_user.profileName,
+            "name": rel.parentName,
             "phone": rel.parent_user.hashedPhoneNumber,
             "role": "child",
             "isApproved": rel.is_approved

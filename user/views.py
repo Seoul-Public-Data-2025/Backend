@@ -41,11 +41,11 @@ class KakaoLoginAPIView(TokenObtainPairView):
             # JWT 리프레시 토큰 발급
             if user.deleted_at is not None:
                 user.deleted_at = None
-                user.fcmToken = request.data.get('fcmToken')
-                user.hashedPhoneNumber = request.data.get('hashedPhoneNumber')
-                user.nickname = request.data.get('nickname', None)
-                user.profile = request.data.get('profile', None)
-                user.save()
+            user.fcmToken = request.data.get('fcmToken')
+            user.hashedPhoneNumber = request.data.get('hashedPhoneNumber')
+            user.nickname = request.data.get('nickname', None)
+            user.profile = request.data.get('profile', None)
+            user.save()
             refresh = RefreshToken.for_user(user)
             return Response({
                 'success': True,
@@ -78,10 +78,10 @@ class KakaoLoginAPIView(TokenObtainPairView):
             # 새 사용자 생성
             user = User.objects.create(
                     email=email,
-                    fcmToken=request.data.get('fcmToken'),  # 예시로 받아오는 fcmToken
-                    hashedPhoneNumber=request.data.get('hashedPhoneNumber'),
-                    nickname=request.data.get('nickname',None),
-                    profile=request.data.get('profile',None),
+                    fcmToken=serializer.validated_data.get('fcmToken'),
+                    hashedPhoneNumber=serializer.validated_data.get('hashedPhoneNumber'),
+                    nickname=serializer.validated_data.get('nickname'),
+                    profile=serializer.validated_data.get('profile'),
                 )
             refresh = RefreshToken.for_user(user)
             return Response({
