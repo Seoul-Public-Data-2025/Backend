@@ -29,6 +29,7 @@ class RelationRequestView(APIView): # 부모-자녀 등록 요청
                 data={
                     "type":"regist",
                     "id":f"{relation.id}",
+                    "childUid":relation.child.id,
                     "childEmail":relation.child.email,
                     "childName":relation.childName
                 })
@@ -76,9 +77,11 @@ class ResendNotificationView(APIView):
                 title="관계요청",
                 body=f"{relation.child.email}님이 보호자 등록을 요청했습니다.",
                 data={
-                    "type": "regist",
-                    "id": f"{relation.id}",
-                    "childEmail":relation.child.email
+                    "type":"regist",
+                    "id":f"{relation.id}",
+                    "childUid":relation.child.id,
+                    "childEmail":relation.child.email,
+                    "childName":relation.childName
                 }
             )
         
@@ -146,8 +149,9 @@ class RelationChildListView(APIView):
         child_relations = [{
             "id": rel.id,
             "name": rel.childName,
+            "uid":rel.child.id,
             "phone": rel.child.hashedPhoneNumber,
-            "role": "parent",
+            "role": "child",
             "isApproved": rel.is_approved
         } for rel in as_parent]
 
@@ -168,7 +172,7 @@ class RelationParentListView(APIView):
             "id": rel.id,
             "name": rel.parentName,
             "phone": rel.parent_user.hashedPhoneNumber,
-            "role": "child",
+            "role": "parent",
             "isApproved": rel.is_approved
         } for rel in as_child]
 

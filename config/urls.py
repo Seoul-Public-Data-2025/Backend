@@ -1,10 +1,12 @@
-from django.urls import path
+from django.urls import path,include
 from user.views import KakaoLoginAPIView, LogoutView, UserUpdateDeleteView
 from relation.views import RelationRequestView, RelationApproveView, RelationParentListView, RelationChildListView, ResendNotificationView, RelationUpdateNameView, RelationDeleteView,FCMTestView
 from user.views import KakaoLoginAPIView,LogoutView,HealthCheckView
 from rest_framework_simplejwt.views import TokenRefreshView
 from openapi.views import CCTVFetchView, SafetyFacilityFetchView, SafetyServiceFetchView, DisplayIconView, PoliceOfficeFetchView
 from .schema import schema_view
+from django_eventstream import urls as eventstream_urls
+from relation.sse.views import ChildLocationView,ChildDisconnectView
 urlpatterns = [
     path('',HealthCheckView.as_view(),name='health-check'),
     path('api/auth/kakao-login/', KakaoLoginAPIView.as_view(), name='kakao-login'),#카카오 access_token으로 로그인 (JWT 발급)
@@ -27,4 +29,8 @@ urlpatterns = [
     path('api/relation-delete/',RelationDeleteView.as_view(),name='relation-delete'),
     path('api/user/',UserUpdateDeleteView.as_view(),name='user-update-delete'),#accessToken필요
     path('test-fcm/',FCMTestView.as_view(),name='fcm-test'),
+    #sse
+    path('events/child/<str:child_uid>/', include(eventstream_urls),{'channels':['child']}),
+    path('api/child-location/',ChildLocationView.as_view(),name='send-location'),
+    path('api/child-disconnection/',ChildDisconnectView.as_view(),name='disconnect-sse'),
 ]

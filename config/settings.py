@@ -44,13 +44,43 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'rest_framework_simplejwt.token_blacklist',
+    'rest_framework',#DRF
+    'rest_framework_simplejwt.token_blacklist',#JWT
     'rest_framework_simplejwt',
-    'corsheaders',
-    'drf_yasg',
-    'storages',
+    'corsheaders',#CORS
+    'drf_yasg',#swagger
+    'storages',#static/media storage
+    "channels",#asgi
+    "django_eventstream",#sse
 ]
+
+DJANGO_EVENTSTREAM_CHANNELS = {
+    "child": lambda request, child_uid: (
+        request.user.is_authenticated and _can_listen_to_child(request.user, child_uid)
+    )
+}
+
+def _can_listen_to_child(user, child_uid):
+    from relation.models import Relation
+    from utils.hash import hash_uid
+
+    return any(
+        hash_uid(str(rel.child_user_id)) == child_uid
+        for rel in Relation.objects.filter(
+            parent_user=user,
+            is_approved=True
+        ).only('child__id')
+    )
+
+# Redis 백엔드 (옵션이지만 다중 서버 확장을 고려하면 필요)
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("localhost", 6379)],
+        },
+    },
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
