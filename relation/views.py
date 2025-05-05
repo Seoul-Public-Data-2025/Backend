@@ -29,7 +29,7 @@ class RelationRequestView(APIView): # 부모-자녀 등록 요청
                 data={
                     "type":"regist",
                     "id":f"{relation.id}",
-                    "childUid":relation.child.id,
+                    "childUid":f"{relation.child.id}",
                     "childEmail":relation.child.email,
                     "childName":relation.childName
                 })
@@ -79,7 +79,7 @@ class ResendNotificationView(APIView):
                 data={
                     "type":"regist",
                     "id":f"{relation.id}",
-                    "childUid":relation.child.id,
+                    "childUid":f"{relation.child.id}",
                     "childEmail":relation.child.email,
                     "childName":relation.childName
                 }
@@ -147,9 +147,9 @@ class RelationChildListView(APIView):
 
         as_parent = Relation.objects.filter(parent_user=user)
         child_relations = [{
-            "id": rel.id,
+            "id": f"{rel.id}",
             "name": rel.childName,
-            "uid":rel.child.id,
+            "uid":f"{rel.child.id}",
             "phone": rel.child.hashedPhoneNumber,
             "role": "child",
             "isApproved": rel.is_approved
@@ -169,7 +169,7 @@ class RelationParentListView(APIView):
 
         as_child = Relation.objects.filter(child=user)
         parent_relations = [{
-            "id": rel.id,
+            "id": f"{rel.id}",
             "name": rel.parentName,
             "phone": rel.parent_user.hashedPhoneNumber,
             "role": "parent",
@@ -265,7 +265,7 @@ class RelationDeleteView(APIView):
             body=f"{relation.child.email}님이 보호자 등록을 취소했습니다.",
             data={
                 "type": "delete",
-                "id": relation_id,
+                "id": f"{relation_id}",
                 "parentPhoneNumber":relation.parent_user.hashedPhoneNumber,
                 "parentName":relation.parentName
             }
