@@ -2,10 +2,10 @@ from rest_framework import serializers
 from .models import CustomUser
 
 class KakaoTokenSerializer(serializers.ModelSerializer):
-    accessToken=serializers.CharField()
+    kakaoAccessToken=serializers.CharField()
     class Meta:
         model = CustomUser
-        fields=["email","accessToken","hashedPhoneNumber","image","profileName","fcmToken"]
+        fields=["email","kakaoAccessToken","hashedPhoneNumber","fcmToken", "nickname", "profile"]
         
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:

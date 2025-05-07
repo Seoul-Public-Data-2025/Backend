@@ -7,9 +7,10 @@ from rest_framework import status
 from relation.models import Relation
 from relation.serializer import RelationRequestSerializer
 from utils.fcm import send_fcm_notification
+from user.models import CustomUser
 
 class RelationRequestView(APIView): # 부모-자녀 등록 요청
-    permission_classes = [HasHashedPhoneNumber,IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         serializer = RelationRequestSerializer(data=request.data, context={'request': request})
         
@@ -27,12 +28,15 @@ class RelationRequestView(APIView): # 부모-자녀 등록 요청
                 body=f"{relation.child.email}님이 보호자 등록을 요청했습니다.",
                 data={
                     "type":"regist",
-                    "id":relation.id
+                    "id":f"{relation.id}",
+                    "childUid":f"{relation.child.id}",
+                    "childEmail":relation.child.email,
+                    "childName":relation.childName
                 })
             return Response({
                 'success': True,
                 'result': {
-                    'id':relation.id,
+                    'id':f"{relation.id}",
                     'message': '알림을 전송했습니다.'
                 }
             }, status=status.HTTP_201_CREATED)
@@ -73,8 +77,11 @@ class ResendNotificationView(APIView):
                 title="관계요청",
                 body=f"{relation.child.email}님이 보호자 등록을 요청했습니다.",
                 data={
-                    "type": "regist",
-                    "id": relation.id
+                    "type":"regist",
+                    "id":f"{relation.id}",
+                    "childUid":f"{relation.child.id}",
+                    "childEmail":relation.child.email,
+                    "childName":relation.childName
                 }
             )
         
@@ -128,40 +135,51 @@ class RelationApproveView(APIView): # 부모-자녀 등록 수락
             'success': True,
             'result': {
                 'message': '요청을 성공적으로 수락했습니다.',
-                'id':relation.id
+                'id':f"{relation.id}"
             }
         }, status=status.HTTP_200_OK)
         
 
-class RelationRoleListView(APIView):
+class RelationChildListView(APIView):
     permission_classes=[IsAuthenticated]
     def get(self, request):
         user = request.user
 
-        # 보호자인 관계들
-        as_parent = Relation.objects.filter(parent_user=user, is_approved=True)
-        parent_relations = [{
-            "id": rel.id,
-            "name": rel.child.profileName,
+        as_parent = Relation.objects.filter(parent_user=user)
+        child_relations = [{
+            "id": f"{rel.id}",
+            "name": rel.childName,
+            "uid":f"{rel.child.id}",
             "phone": rel.child.hashedPhoneNumber,
-            "role": "parent",
+            "role": "child",
             "isApproved": rel.is_approved
         } for rel in as_parent]
 
-        # 피보호자인 관계들
-        as_child = Relation.objects.filter(child=user, is_approved=True)
-        child_relations = [{
-            "id": rel.id,
-            "name": rel.parent_user.profileName,
+        return Response({
+            "success": True,
+            "result": {
+                "relations": child_relations
+            }
+        }, status=status.HTTP_200_OK)
+
+class RelationParentListView(APIView):
+    permission_classes=[IsAuthenticated]
+    def get(self, request):
+        user = request.user
+
+        as_child = Relation.objects.filter(child=user)
+        parent_relations = [{
+            "id": f"{rel.id}",
+            "name": rel.parentName,
             "phone": rel.parent_user.hashedPhoneNumber,
-            "role": "child",
+            "role": "parent",
             "isApproved": rel.is_approved
         } for rel in as_child]
 
         return Response({
             "success": True,
             "result": {
-                "relations": parent_relations + child_relations
+                "relations": parent_relations
             }
         }, status=status.HTTP_200_OK)
 
@@ -212,7 +230,7 @@ class RelationUpdateNameView(APIView):
             "success": True,
             "result": {
                 "message": "이름이 성공적으로 변경되었습니다.",
-                "relation_id": relation.id
+                "relation_id": f"{relation.id}"
             }
         }, status=status.HTTP_200_OK)
         
@@ -247,10 +265,32 @@ class RelationDeleteView(APIView):
             body=f"{relation.child.email}님이 보호자 등록을 취소했습니다.",
             data={
                 "type": "delete",
-                "id": relation_id
+                "id": f"{relation_id}",
+                "parentPhoneNumber":relation.parent_user.hashedPhoneNumber,
+                "parentName":relation.parentName
             }
         )
         return Response({
             "success": True,
             "message": "관계가 성공적으로 삭제되었습니다."
-        }, status=status.HTTP_204_NO_CONTENT)
+        }, status=status.HTTP_200_OK)
+        
+        
+class FCMTestView(APIView):
+    def post(self, request):
+        token = request.data.get('fcmToken')
+        if not token:
+            return Response({'error': 'fcmToken is required'}, status=status.HTTP_400_BAD_REQUEST)
+        user=CustomUser.objects.filter(fcmToken=token).first()
+        result=send_fcm_notification(
+            token=token,
+            title="관계요청",
+            body=f"{user.email}님 안녕하세요.",
+            data={
+                "type":"regist",
+                "id":f"{user.id}"
+            }
+        )
+        if result:
+            return Response({'message': 'Notification sent', 'message_id': result}, status=status.HTTP_200_OK)
+        return Response({'error': 'Failed to send notification'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
